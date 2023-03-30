@@ -14,8 +14,14 @@ This is the final project for my machine learning class
 ## Steps to start working on the project
 
 - Create a new virtual environment and activate it :
+
+with pyenv virtualenv:
 ```bash
 	pyenv virtualenv clustering_OFF && pyenv activate clustering_OFF
+```
+or conda:
+```bash
+	conda clustering_OFF && conda activate clustering_OFF
 ```
 
 - Install required librairies :
