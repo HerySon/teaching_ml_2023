@@ -4,16 +4,12 @@ from sklearn.preprocessing import OneHotEncoder
 
 def non_numeric_features_encoder(df, columns):
     """
-    Encode non-numeric features in a pandas dataframe using OneHotEncoder from sklearn.
-    Parameters:
-    -----------
-    df : pandas DataFrame (The input dataframe)
-    columns : list of str (The list of column names to encode)
-    
+    Encode non-numeric features in a pandas dataframe using OneHotEncoder from Scikit-Learn.
+    Args:
+        df : pandas dataframe (The input dataframe)
+        columns : list of str (The list of column names to encode)
     Returns:
-    --------
-    pandas DataFrame
-        The encoded dataframe.
+        df : the encoded dataframe
     """
     # create a OneHotEncoder object
     encoder = OneHotEncoder(sparse=False)
