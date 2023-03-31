@@ -4,7 +4,6 @@
 import yaml
 import pandas as pd
 
-
 def read_config(file_path='./config.yaml'):
     """Reads configuration file
     Args:
@@ -33,5 +32,5 @@ def get_data(file_path=None, nrows=None):
                        nrows=nrows, low_memory=False)
 
 if __name__ == "__main__":
-    data = get_data(file_path = "./data/en.openfoodfacts.org.products.csv", nrows=50)
+    data = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=50)
     print(f"data set shape is {data.shape}") 
