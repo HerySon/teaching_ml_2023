@@ -4,7 +4,6 @@ import pandas as pd
 def outliers_process(df, columns, method = 'nan', k=1.5):
     """
     Detects and handles outliers in a pandas dataframe using Interquartile Range.
-    Parameters:
     Args:
         df : pandas dataframe (The input dataframe)
         columns : list of str (The list of column names to handle outliers for))
