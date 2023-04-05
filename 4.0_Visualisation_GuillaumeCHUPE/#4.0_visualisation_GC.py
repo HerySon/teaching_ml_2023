@@ -6,7 +6,7 @@ def plot_wordcloud(data, column):
     Args:
         data (DataFrame): The dataframe to use.
         column (str): The name of the column to display.
-    """
+    """ 
     text = ' '.join(data[column].astype(str).tolist())
     wordcloud = WordCloud(width=800, height=800, background_color='white', colormap='Set2', min_font_size=10).generate(text)
 
