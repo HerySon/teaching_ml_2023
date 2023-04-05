@@ -1,9 +1,33 @@
 import pandas as pd
 import numpy as np
 import logging
+import matplotlib.pyplot as plt
 from sklearn.cluster import AgglomerativeClustering, FeatureAgglomeration
+from scipy.cluster.hierarchy import dendrogram
 
-def hie_clustering(df,modeltype=AgglomerativeClustering,n_clusters=2,linkage='ward',metric='euclidean'):
+def plot_dendrogram(model, **kwargs):
+    # Create linkage matrix and then plot the dendrogram
+
+    # create the counts of samples under each node
+    counts = np.zeros(model.children_.shape[0])
+    n_samples = len(model.labels_)
+    for i, merge in enumerate(model.children_):
+        current_count = 0
+        for child_idx in merge:
+            if child_idx < n_samples:
+                current_count += 1  # leaf node
+            else:
+                current_count += counts[child_idx - n_samples]
+        counts[i] = current_count
+
+    linkage_matrix = np.column_stack(
+        [model.children_, model.distances_, counts]
+    ).astype(float)
+
+    # Plot the corresponding dendrogram
+    dendrogram(linkage_matrix, **kwargs)
+
+def hie_clustering(df,modeltype=AgglomerativeClustering,n_clusters=2,linkage='ward',metric='euclidean', plotdendrogram=False):
     """
     Hierachical clustering method from Scikit-Learn.
     Args:
@@ -21,12 +45,30 @@ def hie_clustering(df,modeltype=AgglomerativeClustering,n_clusters=2,linkage='wa
         metric : Metric used to compute the linkage (default='euclidean')
             Can be 'euclidean', 'l1', 'l2', 'manhattan', 'cosine', or 'precomputed'.
             If linkage is 'ward', only 'euclidean' is accepted.
+        plotdendrogram : bool (Default=True)
+            Will plot the dendogram
     Return:
         model with clusters
+        predicted labels
     """
     if linkage == 'ward' and metric != 'euclidean':
         metric='euclidean'
         logging.warning("If linkage is 'ward', only 'euclidean' is accepted. Automatically switch to 'euclidean'.")
-                        
-    model = modeltype(n_clusters=n_clusters,linkage=linkage,metric=metric).fit(df)
+        
+    if plotdendrogram==True and n_clusters != None:
+        n_clusters=None
+        dt=0
+        logging.warning("Exactly one of n_clusters and distance_threshold has to be set, and the other needs to be None. Automatically switch to None.")
+    else:
+        dt=None
+  
+    model = modeltype(n_clusters=n_clusters,linkage=linkage,metric=metric,distance_threshold=dt).fit(df)
+
+    if plotdendrogram:
+        plt.title("Hierarchical Clustering Dendrogram")
+        # plot the top three levels of the dendrogram
+        plot_dendrogram(model, truncate_mode="level", p=3)
+        plt.xlabel("Number of points in node (or index of point if no parenthesis).")
+        plt.show()
+
     return model, model.labels_
