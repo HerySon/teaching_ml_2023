@@ -8,12 +8,13 @@ def non_numeric_features_encoder(df, columns, sparse=True):
     Args:
         df : pandas dataframe (The input dataframe)
         columns : list of str (The list of column names to encode)
-        sparse : bool (Whether to use sparse matrix format. Default is True)
+        sparse : bool (Default=True)
+            Will return sparse matrix if set True else will return an array.
     Returns:
         df : the encoded dataframe
     """
     # create a OneHotEncoder object
-    encoder = OneHotEncoder(sparse=sparse)
+    encoder = OneHotEncoder(sparse_output=sparse)
     # encode features selected
     encoded_features = encoder.fit_transform(df[columns])
     # create a list of the new features names
