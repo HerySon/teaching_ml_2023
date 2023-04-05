@@ -2,17 +2,18 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 
 
-def non_numeric_features_encoder(df, columns):
+def non_numeric_features_encoder(df, columns, sparse=True):
     """
     Encode non-numeric features in a pandas dataframe using OneHotEncoder from Scikit-Learn.
     Args:
         df : pandas dataframe (The input dataframe)
         columns : list of str (The list of column names to encode)
+        sparse : bool (Whether to use sparse matrix format. Default is True)
     Returns:
         df : the encoded dataframe
     """
     # create a OneHotEncoder object
-    encoder = OneHotEncoder(sparse=False)
+    encoder = OneHotEncoder(sparse=sparse)
     # encode features selected
     encoded_features = encoder.fit_transform(df[columns])
     # create a list of the new features names
