@@ -24,21 +24,24 @@ def outliers_process(df, columns, method = 'nan', k=1.5):
     min = Q1 - k * IQR
     max = Q3 + k * IQR
     
+    # conditions
+    outliers_condition = ((df_outliers[columns] < min) | (df_outliers[columns] > max))
+
     # handle outliers
         # replace outliers with NaN value
     if method == 'nan':
-        df_outliers = df_outliers.mask(((df_outliers[columns] < min)) | ((df_outliers[columns] > max)))
+        df_outliers = df_outliers.mask(outliers_condition)
         # drop rows with outliers
     elif method == 'drop':
-        df_outliers = df_outliers[~((df_outliers[columns] < min) | (df_outliers[columns] > max)).any(axis=1)]
+        df_outliers = df_outliers[~outliers_condition.any(axis=1)]
         # replace outliers with median value
     elif method == 'median':
         median = df_outliers[columns].median()
-        df_outliers = df_outliers[columns].mask(((df_outliers[columns] < min)) | ((df_outliers[columns] > max)), median, axis=1)
+        df_outliers = df_outliers[columns].mask(outliers_condition, median, axis=1)
         # replace outliers with mean value
     elif method == 'mean':
         mean = df_outliers[columns].mean()
-        df_outliers = df_outliers[columns].mask(((df_outliers[columns] < min)) | ((df_outliers[columns] > max)), mean, axis=1)
+        df_outliers = df_outliers[columns].mask(outliers_condition, mean, axis=1)
     else:
         return df
     return df_outliers
