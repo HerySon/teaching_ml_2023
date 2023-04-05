@@ -1,8 +1,9 @@
 import pandas as pd
 import numpy as np
+import logging
 from sklearn.cluster import AgglomerativeClustering, FeatureAgglomeration
 
-def hie_clustering(df,modeltype=AgglomerativeClustering,n_clusters=2,linkage='ward'):
+def hie_clustering(df,modeltype=AgglomerativeClustering,n_clusters=2,linkage='ward',metric='euclidean'):
     """
     Hierachical clustering method from Scikit-Learn.
     Args:
@@ -17,8 +18,15 @@ def hie_clustering(df,modeltype=AgglomerativeClustering,n_clusters=2,linkage='wa
                 'average' uses the average of the distances of each observation of the two sets
                 'complete' linkage uses the maximum distances between all observations of the two sets
                 'single' uses the minimum of the distances between all observations of the two sets
+        metric : Metric used to compute the linkage (default='euclidean')
+            Can be 'euclidean', 'l1', 'l2', 'manhattan', 'cosine', or 'precomputed'.
+            If linkage is 'ward', only 'euclidean' is accepted.
     Return:
         model with clusters
     """
-    model = modeltype(n_clusters=n_clusters,linkage=linkage).fit(df)
-    return model
+    if linkage == 'ward' and metric != 'euclidean':
+        metric='euclidean'
+        logging.warning("If linkage is 'ward', only 'euclidean' is accepted. Automatically switch to 'euclidean'.")
+                        
+    model = modeltype(n_clusters=n_clusters,linkage=linkage,metric=metric).fit(df)
+    return model, model.labels_
