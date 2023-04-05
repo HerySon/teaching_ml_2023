@@ -21,8 +21,8 @@ def outliers_process(df, columns, method = 'nan', k=1.5):
     IQR = Q3 - Q1
     
     # Calculate lower and upper bounds for outliers detection
-    min = Q1 - 1.5 * IQR
-    max = Q3 + 1.5 * IQR
+    min = Q1 - k * IQR
+    max = Q3 + k * IQR
     
     # handle outliers
         # replace outliers with NaN value
