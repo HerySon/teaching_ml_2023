@@ -24,11 +24,11 @@ def kmeans(dataset, k=8):
     assert_equal(dataset.isna().sum().sum(), 0,
                  err_msg=f'There is {dataset.isna().sum().sum()} NaN values in dataset, please preprocess them before '
                          f'trying to fit KMeans.')
-    model = KMeans(n_clusters=k, random_state=13)
+    model = KMeans(n_clusters=k, random_state=13, n_init=10)
     gs_cv = GridSearchCV(model, cv=5, param_grid=[{"algorithm": ['lloyd', 'elkan', 'auto', 'full']},
                                                   {"init": ["k-means++", "random"]},
                                                   {"n_init": ["auto", 5, 10, 25, 50]}])
     gs_cv.fit(dataset)
-    model = gs_cv.best_params_
+    model = gs_cv.best_estimator_
     assert_equal(type(model), type(KMeans()), err_msg='Output will not be KMeans class instance.', verbose=True)
     return model
