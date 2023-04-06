@@ -41,11 +41,12 @@ def non_numeric_features_encoder(df, columns, encoder_type=OrdinalEncoder, spars
 
 
 
-def concat_matrix(df, matrix):
+def concat_matrix(df, columns, matrix):
     """
     Concat dataframe and sparse matrix from non_numeric_features_encoder function, if encoder_type == OneHotEncoder and sparse == True.
     Args :
         df : pandas dataframe (The input dataframe)
+        columns : list of str (The list of encoded column names)
         matrix : sparse matrix
     Returns:
         df : concatenation dataframe and sparce matrix output of OneHotEncoder
