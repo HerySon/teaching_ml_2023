@@ -6,6 +6,18 @@ from sklearn.cluster import AgglomerativeClustering, FeatureAgglomeration
 from scipy.cluster.hierarchy import dendrogram
 
 def plot_dendrogram(model, **kwargs):
+    """
+    This function creates a linkage matrix from the model and uses it to plot a dendrogram 
+    of the clustering. The linkage matrix is created by counting the number of samples under
+    each node of the dendrogram, and the scipy dendrogram function is used to actually plot
+    the dendrogram. Additional keyword arguments can be passed to the scipy dendrogram function
+    through **kwargs.
+    Args:
+        model : AgglomerativeClustering or FeatureAgglomeration object
+            The fitted hierarchical clustering model to visualize.
+        **kwargs : optional keyword arguments
+            Additional arguments to pass to the scipy dendrogram function.
+    """
     # Create linkage matrix and then plot the dendrogram
 
     # create the counts of samples under each node
