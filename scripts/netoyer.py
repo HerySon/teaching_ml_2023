@@ -5,7 +5,7 @@ data = pd.read_csv("openfoodfacts.csv", sep="\t", encoding="utf-8")
 # les colonnes non utils
 data.drop(columns=["url", "creator", "created_t", "last_modified_t", "pnns_groups_1", "pnns_groups_2"], inplace=True)
 
-# les lignes des valeurs manquantes et supprimer
+# les lignes des valeurs manquantes et supprimerdhgdhgd
 data.dropna(inplace=True)
 
 # Convertir les colonnes 
