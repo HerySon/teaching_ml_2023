@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.preprocessing import OrdinalEncoder 
 
 
@@ -21,3 +22,22 @@ def non_numeric_features_encoder(df, columns):
     df[encoder.get_feature_names_out()] = encoded_features
     # return new dataframe with features encoded
     return df
+
+
+
+
+# Unit test
+
+# Consider dataset containing ramen rating
+df = pd.DataFrame({
+    'brand': ['Yum Yum', 'Yum Yum', 'Indomie', 'Indomie', 'Tanoshi', 'Cup Noodles'],
+    'style': ['cup', 'cup', 'cup', 'pack', 'pack', 'cup'],
+    'rating': [49, 4, 3.5, 1, 5, 2],
+    'grams': [80, 80, 80, 90, 90, 500]
+    })
+
+# Define non-numeric features to encode
+columns = ['brand', 'style']
+
+# Encore non-numeric features. Converted to ordinal integers (0 to n_categories - 1)
+non_numeric_features_encoder(df, columns)
