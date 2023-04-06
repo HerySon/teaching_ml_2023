@@ -1,12 +1,11 @@
-def kmeans(dataset, k=8, algorithm='lloyd'):
+def kmeans(dataset, k=8):
     """
      This function will fit a KMeans model. You pass the OpenFoodFact dataset as entry and you get the fitted model at the end.
-    You can precise the number of cluster and the algorithm used to define the clusters.
+    You can precise the number of cluster expected.
 
     Args :
         dataset -- the dataset who contains OpenFoodFact data (required)
         k -- number of clusters -- Default = 8
-        algorithm -- type of algorithm used. Possibility are : ['lloyd', 'elkan', 'auto', 'full'] (refers to https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html for more informations) -- Default = 'lloyd'
 
     Returns :
         Fitted model of KMeans.
@@ -15,8 +14,18 @@ def kmeans(dataset, k=8, algorithm='lloyd'):
     import numpy as np
     from numpy.testing import assert_equal
     from sklearn.cluster import KMeans
+    from sklearn.model_selection import GridSearchCV
     assert_equal(type(dataset), type(pd.DataFrame()), err_msg='Input is not Pandas Dataframe.', verbose=True)
-    model = KMeans(n_clusters=k, random_state=13, algorithm=algorithm)
-    model.fit(dataset)
+    for i in dataset.columns:
+        assert dataset[i].dtype in [type(5), type(5.5), np.int64().dtype, np.int32().dtype, np.float64().dtype,
+                                    np.float32().dtype], f'{i} column of the dataset is not numeric type. Please ' \
+                                                         f'convert columns to numeric type or input only a part of ' \
+                                                         f'the dataset with numeric columns only.'
+    model = KMeans(n_clusters=k, random_state=13)
+    gs_cv = GridSearchCV(model, cv=5, param_grid=[{"algorithm": ['lloyd', 'elkan', 'auto', 'full']},
+                                                  {"init": ["kmeans++", "random"]},
+                                                  {"n_init": ["auto", 5, 10, 25, 50]}])
+    gs_cv.fit(dataset)
+    model = gs_cv.best_params_
     assert_equal(type(model), type(KMeans()), err_msg='Output will not be KMeans class instance.', verbose=True)
     return model
