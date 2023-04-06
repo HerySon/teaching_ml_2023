@@ -72,3 +72,19 @@ def hie_clustering(df, modeltype=AgglomerativeClustering, n_clusters=2, linkage=
         plt.show()
 
     return model, model.labels_
+
+
+
+
+# Unit test
+
+# Consider dataset containing ramen rating
+df = pd.DataFrame({
+    'brand': [3, 3, 1, 1, 2, 0],
+    'style': [0, 0, 0, 1, 1, 0],
+    'rating': [3, 4, 3.5, 1, 5, 2],
+    'grams': [80, 80, 80, 90, 90, 80]
+    })
+
+# Hierachical clustering and plot dendogram
+hie_clustering(df, modeltype=AgglomerativeClustering, n_clusters=2, linkage='ward', metric='l1', plotdendrogram=True)
