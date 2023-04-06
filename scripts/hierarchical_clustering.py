@@ -27,7 +27,8 @@ def plot_dendrogram(model, **kwargs):
     # Plot the corresponding dendrogram
     dendrogram(linkage_matrix, **kwargs)
 
-def hie_clustering(df,modeltype=AgglomerativeClustering,n_clusters=2,linkage='ward',metric='euclidean', plotdendrogram=False):
+
+def hie_clustering(df, modeltype=AgglomerativeClustering, n_clusters=2, linkage='ward', metric='euclidean', plotdendrogram=False):
     """
     Hierachical clustering method from Scikit-Learn.
     Args:
@@ -48,8 +49,7 @@ def hie_clustering(df,modeltype=AgglomerativeClustering,n_clusters=2,linkage='wa
         plotdendrogram : bool (Default=True)
             Will plot the dendogram
     Return:
-        model with clusters
-        predicted labels
+        model with clusters, predicted labels, dendogram (optional)
     """
     if linkage == 'ward' and metric != 'euclidean':
         metric='euclidean'
