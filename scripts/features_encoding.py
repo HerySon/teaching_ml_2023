@@ -12,8 +12,8 @@ def non_numeric_features_encoder(df, columns, encoder_type=OrdinalEncoder, spars
         encoder_type : OrdinalEncoder or OneHotEncoder (Default='OrdinalEncoder')
             'OrdinalEncoder' : The features are converted to ordinal integers. This results in a single column of integers (0 to n_categories - 1) per feature.
             'OneHotEncoder' : This creates a binary column for each category and returns a sparse matrix or dense array (depending on the sparse_output parameter).
-        sparse : bool (Default=False), use for OneHotEncoder method
-            Will return sparse matrix if set True else will return an array.
+                sparse : bool (Default=False)
+                    Will return sparse matrix if set True else will return an array.
     Returns:
         df : the encoded dataframe
     """
@@ -26,16 +26,37 @@ def non_numeric_features_encoder(df, columns, encoder_type=OrdinalEncoder, spars
     # encode features selected
     encoded_features = encoder.fit_transform(df[columns])
     
-    # create a list of the new features names or return matrix
+    # create a list of the new features names
     if encoder_type == OneHotEncoder and sparse == True:
         return encoded_features
     else:
         df[encoder.get_feature_names_out()] = encoded_features
 
     # drop original features if OneHotEncoder
-    if encoder == OneHotEncoder:
+    if encoder_type == OneHotEncoder:
         df.drop(columns, axis=1, inplace=True)
     
+    # return new dataframe with features encoded
+    return df
+
+
+
+def concat_matrix(df, matrix):
+    """
+    Concat dataframe and sparse matrix from non_numeric_features_encoder function, if encoder_type == OneHotEncoder and sparse == True.
+    Args :
+        df : pandas dataframe (The input dataframe)
+        matrix : sparse matrix
+    Returns:
+        df : concatenation dataframe and sparce matrix output of OneHotEncoder
+    """
+    import scipy.sparse
+    # matrix to pd
+    df_matrix = pd.DataFrame.sparse.from_spmatrix(matrix)
+    # create a list of the new features names
+    df[encoder.get_feature_names_out()] = df_matrix
+    # drop original features if OneHotEncoder
+    df.drop(columns, axis=1, inplace=True)
     # return new dataframe with features encoded
     return df
 
