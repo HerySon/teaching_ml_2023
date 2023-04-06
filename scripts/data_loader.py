@@ -27,9 +27,12 @@ def get_data(file_path=None, nrows=None):
     if file_path is None:
         cfg = read_config()
         file_path = cfg['paths']['eng_dataset']
-    print("Reading dataset ...")    
-    return pd.read_csv(file_path,sep="\t", encoding="utf-8",
+    print("Reading dataset ...") 
+    pd.set_option('display.max_columns', 500)
+    pd.set_option('display.width', 1000)   
+    data = pd.read_csv(file_path,sep="\t", encoding="utf-8",
                        nrows=nrows, low_memory=False)
+    return data
 
 if __name__ == "__main__":
     data = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=50)
