@@ -1,5 +1,4 @@
 def incoherent_values(dataset, check_max_nrj = True, check_sug_carb = True):
-    import pandas as pd
     """
     This function aim to clean incoherent values from features. You pass the OpenFoodFact dataset as entry and you get the processed dataset at the end.
 
@@ -15,6 +14,12 @@ def incoherent_values(dataset, check_max_nrj = True, check_sug_carb = True):
     Returns :
         Dataset of OpenFoodFact cleaned of some incoherent values.
     """
+    import numpy as np
+    from numpy.testing import assert_equal
+    import pandas as pd
+    
+    assert_equal(type(dataset), type(pd.DataFrame()), err_msg='Input is not Pandas Dataframe.', verbose=True)
+    
     nutrition_table_cols = ["energy_100g",
                             "fat_100g",
                             "carbohydrates_100g",
