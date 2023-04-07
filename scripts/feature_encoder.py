@@ -1,22 +1,29 @@
-def encoding_vars(dataset):
+def encoding_vars(dataset, big_memory = False, cols_to_split_but_big_memory = ["categories", "ingredients_tags"],
+                  cols_to_split=["nutrient_levels_tags", "food_groups_tags", "allergens", "ingredients_analysis_tags", "labels_fr"], 
+                 ordinal_cols = ["ecoscore_grade", "nutriscore_grade", "nova_group"],
+                 dummies_cols = ["brands_tags", "origins_fr", "generic_name", "product_name", "first_packaging_code_geo",
+                    "additives_fr", "pnns_groups_1", "pnns_groups_2", "main_category"]):
     import pandas as pd
     import numpy as np
     from sklearn.preprocessing import OrdinalEncoder
     """
     This function encode non-numeric features. You pass the OpenFoodFact dataset as entry and you get the encoded dataset at the end.
-    Will be different encoding depending on some factors. Features with ordinal order are encoded with OrdinalEncoder. Features without ',' are encoded with OneHotEncoder. Features with ',' are manually encoded, like a OneHotEncoder would have done, but before we split the datas.
+    Will be different encoding depending on some factors. Features with ordinal order are encoded with OrdinalEncoder. 
+    Features without ',' are encoded with OneHotEncoder. Features with ',' are manually encoded, like a OneHotEncoder would have done, but before we split the datas.
 
     Args :
         dataset -- the dataset who contains OpenFoodFact data (required)
+        big_memory -- boolean argument to define if you will run the function with a machine with really big memory or not (True or False)
+        cols_to_split -- list of columns containing values separated with ',' who represent a list of features. Basically, we will split the values and each value will become a new feature.
+        cols_to_split_but_big_memory -- list to columns who will be processed like cols_to_split, but only if big_memory value is True.
+        ordinal_cols -- list of columns to process with OrdinalEncoder. (relation of order between values of the column)
+        dummies_cols -- list of columns to process with OneHotEncoder. (due to increasing dimensions resulting in OneHotEncoding, we only OneHotEncode features with a limited number of distinct values)  
 
     Returns :
         Encoded dataset of OpenFoodFact.
     """
-    cols_to_split_but_big_memory = ["categories", "ingredients_tags"]
-    cols_to_split = ["nutrient_levels_tags", "food_groups_tags", "allergens", "ingredients_analysis_tags", "labels_fr"]
-    ordinal_cols = ["ecoscore_grade", "nutriscore_grade", "nova_group"]
-    dummies_cols = ["brands_tags", "origins_fr", "generic_name", "product_name", "first_packaging_code_geo",
-                    "additives_fr", "pnns_groups_1", "pnns_groups_2", "main_category"]
+    if big_memory == True:
+        cols_to_split = cols_to_split + cols_to_split_but_big_memory
     # Ordinals (OrdinalEncoder)
     for i in ordinal_cols:
         dataset[i].fillna("unknown", inplace=True)
@@ -39,13 +46,13 @@ def encoding_vars(dataset):
             i += 1
         list_of_cat = columnar.value_counts().index
         dataset[i] = dataset[i].astype(str)
-        for i in list_of_cat:
-            dataset[i] = np.nan
+        for j in list_of_cat:
+            dataset[j] = np.nan
             for u in range(len(dataset)):
-                if dataset.loc[u, "allergens"].__contains__(i):
-                    dataset.at[u, i] = 1
+                if dataset.loc[u, i].__contains__(j):
+                    dataset.at[u, j] = 1
                 else:
-                    dataset.at[u, i] = 0
+                    dataset.at[u, j] = 0
     dataset.drop(
         ["creator", "abbreviated_product_name", "brands", "categories_tags", "origins_tags", "origins", "categories_fr",
          "last_modified_by", "traces_tags", "packaging", "packaging_tags", "packaging_fr", "packaging_test",
