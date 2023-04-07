@@ -1,4 +1,4 @@
-def encoding_vars(dataset, big_memory = False, cols_to_split_but_big_memory = ["categories", "ingredients_tags"],
+def encoding_vars(dataset, ohe = True, big_memory = False, cols_to_split_but_big_memory = ["categories", "ingredients_tags"],
                   cols_to_split=["nutrient_levels_tags", "food_groups_tags", "allergens", "ingredients_analysis_tags", "labels_fr"], 
                  ordinal_cols = ["ecoscore_grade", "nutriscore_grade", "nova_group"],
                  dummies_cols = ["brands_tags", "origins_fr", "generic_name", "product_name", "first_packaging_code_geo",
@@ -13,6 +13,7 @@ def encoding_vars(dataset, big_memory = False, cols_to_split_but_big_memory = ["
     import pandas as pd
     import numpy as np
     from sklearn.preprocessing import OrdinalEncoder
+    from category_encoders.hashing import HashingEncoder
     """
     This function encode non-numeric features. You pass the OpenFoodFact dataset as entry and you get the encoded dataset at the end.
     Will be different encoding depending on some factors. 
@@ -25,7 +26,9 @@ def encoding_vars(dataset, big_memory = False, cols_to_split_but_big_memory = ["
     They can be considered as a list of features and it's important to split them to not process them like fundamentally different values.
 
     Args :
-        dataset -- the dataset who contains OpenFoodFact data (required)
+        dataset -- the dataset who contains OpenFoodFact data. (required)
+        
+        ohe -- boolean variable to define whether to use OneHotEncoder or HashingEncoder for the variables in dummies_cols.
         
         big_memory -- boolean argument to define if you will run the function with a machine with really big memory or not (True or False)
         
@@ -49,9 +52,11 @@ def encoding_vars(dataset, big_memory = False, cols_to_split_but_big_memory = ["
     # Ordinals (OrdinalEncoder)
     for i in ordinal_cols:
         dataset[i].fillna("unknown", inplace=True)
-    oe = OrdinalEncoder(
-        categories=[["not-applicable", "unknown", "e", "d", "c", "b", "a"], ["unknown", "e", "d", "c", "b", "a"],
-                    ["unknown", 4.0, 3.0, 2.0, 1.0]])
+    if oe == True:
+      oe = OrdinalEncoder(
+          categories=[["not-applicable", "unknown", "e", "d", "c", "b", "a"], ["unknown", "e", "d", "c", "b", "a"], ["unknown", 4.0, 3.0, 2.0, 1.0]])
+    else:
+      oe = HashingEncoder()
     oe.fit(dataset[ordinal_cols])
     dataset[ordinal_cols] = oe.transform(dataset[ordinal_cols])
     dataset.drop(ordinal_cols, axis=1, inplace=True)
