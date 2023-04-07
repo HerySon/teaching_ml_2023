@@ -18,6 +18,11 @@ def scale_data(dataset, how='standard', nrm = 'l2', qtl_rng = (25.0, 75.0)):
         Dataset of OpenFoodFact with standardized values.
     """
     from sklearn.preprocessing import StandardScaler, MinMaxScaler, Normalizer, RobustScaler
+    import numpy as np
+    from numpy.testing import assert_equal
+    import pandas as pd
+    
+    assert_equal(type(dataset), type(pd.DataFrame()), err_msg='Input is not Pandas Dataframe.', verbose=True)
     if how == 'standard':
         scaler = StandardScaler()
     elif how == 'norm':
