@@ -12,6 +12,7 @@ def encoding_vars(dataset, ohe = True, big_memory = False, cols_to_split_but_big
          "states_fr", "brand_owner", "owner", "popularity_tags", "main_category_fr"]):
     import pandas as pd
     import numpy as np
+    from numpy.testing import assert_equal
     from sklearn.preprocessing import OrdinalEncoder
     from category_encoders.hashing import HashingEncoder
     """
@@ -47,6 +48,7 @@ def encoding_vars(dataset, ohe = True, big_memory = False, cols_to_split_but_big
     Returns :
         Encoded dataset of OpenFoodFact.
     """
+    assert_equal(type(dataset), type(pd.DataFrame()), err_msg='Input is not Pandas Dataframe.', verbose=True)
     if big_memory == True:
         cols_to_split = cols_to_split + cols_to_split_but_big_memory
     # Ordinals (OrdinalEncoder)
