@@ -1,53 +1,66 @@
+#Dataframe
+import pandas as pd
+import numpy as np
+#Viz
+import matplotlib.pyplot as plt
+
 
 
 def cross_table (df,columns) : 
     """
-    Explore variance of the numerical features in a pandas dataframe using matplotlib.
-    The input must not contains Nan value.
+    Explore variance of the categorial features in a pandas dataframe using pandas.
     Args:
         df : pandas dataframe
         columns : list of str (The list of column names to plot)
 
     Returns : 
-        Plot of the variance matrice
-        PCA 
+        Cross table
     """
+    #Select features
     cat_val = df.select_dtypes(include=['object'])
-
-data_crosstab = pd.crosstab(cat_val,
+    #Cross tables
+    data_crosstab = pd.crosstab(cat_val,
                             margins = False)
-print(data_crosstab)
+    return print(data_crosstab)
 
-# significance level
-alpha = 0.05
 
-# Calcualtion of Chisquare
-chi_square = 0
-rows = df['Age Group'].unique()
-columns = df['Political Affiliation'].unique()
-for i in columns:
-    for j in rows:
-        O = data_crosstab[i][j]
-        E = data_crosstab[i]['Total'] * data_crosstab['Total'][j] / data_crosstab['Total']['Total']
-        chi_square += (O-E)**2/E
+def chi_2 (df,columns):
+    """
+    Explore variance of two categorial features in a pandas dataframe using pandas.
+    Args:
+        df : pandas dataframe
+        columns : list of str (The list of column names to plot)
 
-# The p-value approach
-print("Approach 1: The p-value approach to hypothesis testing in the decision rule")
-p_value = 1 - stats.chi2.cdf(chi_square, (len(rows)-1)*(len(columns)-1))
-conclusion = "Failed to reject the null hypothesis."
-if p_value <= alpha:
-    conclusion = "Null Hypothesis is rejected."
-        
-print("chisquare-score is:", chi_square, " and p value is:", p_value)
-print(conclusion)
+    Returns : 
+        Result of chi2
+    """
+    #Select categorial values
+    cat_val = df.select_dtypes(include=['object'])
+    #Clear values
+    observation = cat_val[['creator','packaging']].value_counts().dropna()
+    #import package
+    from  scipy.stats import chi2_contingency  
+    from scipy.stats import chi2
+    #Chi2
+    alpha = 0.05
+    chi_squared_result=chi2_contingency(observation)
     
-# The critical value approach
-print("\n--------------------------------------------------------------------------------------")
-print("Approach 2: The critical value approach to hypothesis testing in the decision rule")
-critical_value = stats.chi2.ppf(1-alpha, (len(rows)-1)*(len(columns)-1))
-conclusion = "Failed to reject the null hypothesis."
-if chi_square > critical_value:
-    conclusion = "Null Hypothesis is rejected."
-        
-print("chisquare-score is:", chi_square, " and critical value is:", critical_value)
-print(conclusion)
+    return print("Pearson stats of chi2 : ", chi_squared_result[0], "\n"
+    "La p-valeur du test est : ", chi_squared_result[1], "\n")
+    print("Le quantile de la loi du chi 2 à 1 degré de liberté associé au niveau de confiance",
+    alpha,"est",chi2.ppf(1-alpha, 1))
+  
+
+  def plot_chi2 (chi2_result):
+    """
+    Plot variance of two categorial features in a pandas dataframe using Maplotlib.
+    Args:
+        chi2_result : result of chi2 test
+   
+    Returns : 
+        Plot chi2
+    """
+
+    p_values = pd.Series(chi2_result[1])
+    p_values.sort_values(ascending = False , inplace = True)
+    return p_values.plot.bar()

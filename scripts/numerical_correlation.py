@@ -11,7 +11,7 @@ from sklearn import preprocessing
 #PCA
 from sklearn.decomposition import PCA
 
-def numerical (df,columns) : 
+def numerical_correlation (df,columns) : 
     """
     Explore variance of the numerical features in a pandas dataframe using matplotlib.
     The input must not contains Nan value.
@@ -26,18 +26,7 @@ def numerical (df,columns) :
     #Select numerical features
     num_val = df[columns].select_dtypes(include=['float64','int64','float32','int32'])
     # Triangle mask
-    mask = np.triu(np.ones_like(num_val)) 
-    #plot dimension
-    fig = plt.figure(figsize=(20, 30))
-    #heatmap configuration
-    ax = sns.heatmap(num_val, mask=mask, vmin=-1, vmax=1,
-                 square=True,linewidths=0.9,
-                 annot=True, annot_kws={'fontsize':'large'}, cmap='BrBG')
-    #Title
-    ax.set_title('Correlation Heatmap', fontdict={'fontsize':20}, pad=5);
-    #x_label
-    ax.set_xlabel('', fontsize='10');
-    plt.xticks(rotation = 45);
+    fig = num_val[columns].corr(method='spearman').style.format("{:.2}").background_gradient(cmap=plt.get_cmap('coolwarm'))
     return fig
 
 def pca_numerical (df): 
