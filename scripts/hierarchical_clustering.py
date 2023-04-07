@@ -17,6 +17,8 @@ def plot_dendrogram(model, **kwargs):
             The fitted hierarchical clustering model to visualize.
         **kwargs : optional keyword arguments
             Additional arguments to pass to the scipy dendrogram function.
+    Returns:
+        None
     """
     # Create linkage matrix and then plot the dendrogram
 
@@ -61,7 +63,7 @@ def hie_clustering(df, modeltype=AgglomerativeClustering, n_clusters=2, linkage=
         plotdendrogram : bool (Default=True)
             Will plot the dendogram
     Return:
-        model with clusters, predicted labels, dendogram (optional)
+        sklearn cluster object
     """
     if linkage == 'ward' and metric != 'euclidean':
         metric='euclidean'
