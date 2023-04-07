@@ -30,5 +30,4 @@ def incoherent_values(dataset, check_max_nrj = True, check_sug_carb = True):
         nutrition_table = nutrition_table.loc[nutrition_table.energy_100g <= 3700]
     if check_sug_carb == True:
         nutrition_table = nutrition_table.loc[nutrition_table.carbohydrates_100g >= nutrition_table.sugars_100g]
-    dataset = dataset.loc[nutrition_table.index, :]
-    return dataset
+    return nutrition_table
