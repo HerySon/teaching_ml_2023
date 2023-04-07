@@ -16,38 +16,41 @@ def non_numeric_features_encoder(df, columns, encoder_type=OrdinalEncoder, spars
                     Will return sparse matrix if set True else will return an array.
     Returns:
         df : the encoded dataframe
+        or sparse matrix and encoder if encoder_type=OneHotEncoder and sparse=True
     """
     # create a OrdinalEncoder/OneHotEncoder object
     if encoder_type == OrdinalEncoder:
         encoder = encoder_type()
     elif encoder_type == OneHotEncoder:
         encoder = encoder_type(sparse_output=sparse)
-        
+            
     # encode features selected
     encoded_features = encoder.fit_transform(df[columns])
     
-    # create a list of the new features names
     if encoder_type == OneHotEncoder and sparse == True:
-        return encoded_features
+        # return sparse matrix and encoder object
+        return encoded_features, encoder
     else:
+        # create a list of the new features names
         df[encoder.get_feature_names_out()] = encoded_features
 
-    # drop original features if OneHotEncoder
-    if encoder_type == OneHotEncoder:
-        df.drop(columns, axis=1, inplace=True)
+        # drop original features if OneHotEncoder
+        if encoder_type == OneHotEncoder:
+            df.drop(columns, axis=1, inplace=True)
     
-    # return new dataframe with features encoded
-    return df
+        # return new dataframe with features encoded
+        return df
 
 
 
-def concat_matrix(df, columns, matrix):
+def concat_matrix(df, columns, matrix, encoder):
     """
     Concat dataframe and sparse matrix from non_numeric_features_encoder function, if encoder_type == OneHotEncoder and sparse == True.
     Args :
         df : pandas dataframe (The input dataframe)
         columns : list of str (The list of encoded column names)
         matrix : sparse matrix
+        encoder : encoder object from non_numeric_features_encoder() function
     Returns:
         df : concatenation dataframe and sparce matrix output of OneHotEncoder
     """
@@ -77,5 +80,8 @@ df = pd.DataFrame({
 # Define non-numeric features to encode
 columns = ['brand', 'style']
 
-# Encore non-numeric features. Converted to ordinal integers (0 to n_categories - 1)
-non_numeric_features_encoder(df, columns)
+# Encore non-numeric features and get sparse matrix
+matrix, encoder = non_numeric_features_encoder(df, columns, encoder_type=OneHotEncoder, sparse=True)
+
+# Concat dataframe and sparse matrix
+concat_matrix(df, columns, matrix, encoder)
