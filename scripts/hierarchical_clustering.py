@@ -20,8 +20,6 @@ def plot_dendrogram(model, **kwargs):
     Returns:
         None
     """
-    # Create linkage matrix and then plot the dendrogram
-
     # create the counts of samples under each node
     counts = np.zeros(model.children_.shape[0])
     n_samples = len(model.labels_)
