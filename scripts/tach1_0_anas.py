@@ -46,7 +46,7 @@ print (data_cleaned.info())
 
 ### Imputing the missing values with KNNImputer 
 
-def imput_missing_values(numerical_data):# last_image_t = 1.623870e+09
+def imput_missing_values(numerical_data):
 
     # Identify columns with missing values
     columns_with_missing_values = numerical_data.columns[numerical_data.isnull().sum() > 0]
