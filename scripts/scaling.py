@@ -1,4 +1,4 @@
-from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, normalize
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, Normalizer
 from data_loader import get_data
 import numpy as np
 
@@ -30,7 +30,8 @@ def scale_fit_df_by_method(df, method, **kwargs):
             unit_variance = kwargs.get('unit_variance', False)
             scaler = RobustScaler(with_centering=with_centering, with_scaling=with_scaling, quantile_range=quantile_range, unit_variance=unit_variance)
         case "normalize":
-            scaler = normalize()
+            norm = kwargs.get('norm', "l2")
+            scaler = Normalizer(norm=norm)
         case _:
             raise ValueError
         
