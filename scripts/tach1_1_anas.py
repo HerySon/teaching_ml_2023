@@ -46,7 +46,7 @@ print (data_cleaned.info())
 
 ### Imputing the missing values with KNNImputer 
 
-def imput_missing_values(numerical_data):
+def imput_missing_values(numerical_data):# last_image_t = 1.623870e+09
 
     # Identify columns with missing values
     columns_with_missing_values = numerical_data.columns[numerical_data.isnull().sum() > 0]
@@ -55,7 +55,6 @@ def imput_missing_values(numerical_data):
     # Create a pipeline for preprocessing
     preprocessing_pipeline = Pipeline([
         ('imputer', KNNImputer(n_neighbors=5)),  # KNNImputer for imputing missing values
-        ('scaler', StandardScaler())  # StandardScaler for scaling numeric features
     ])
 
     # Fit and transform the data using the preprocessing pipeline
@@ -64,6 +63,9 @@ def imput_missing_values(numerical_data):
     # Convert the preprocessed data back to a DataFrame
     data_preprocessed = pd.DataFrame(data_preprocessed, columns=numerical_data.columns)
     return data_preprocessed
+
+
+
 
 
 ## lets take only the numerical columns (float,int..)
@@ -75,3 +77,5 @@ print(numerical_data.head())
 
 data_preprocessed  = imput_missing_values(numerical_data)
 print(data_preprocessed.head())
+
+
