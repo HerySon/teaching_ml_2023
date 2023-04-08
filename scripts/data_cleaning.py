@@ -38,8 +38,6 @@ def fonction_taux_remplissage_features(df):
     - df : DataFrame, l'ensemble de données à analyser
     """
     
-    fonction_taux_remplissage_features(df)
-    
     # Calcul du taux de nullité pour chaque variable en utilisant la fonction taux_remplissage_variables
     filling_features = taux_remplissage_variables(df, 0)
     
@@ -72,6 +70,7 @@ def nettoyer_donnees(df):
     Paramètres :
     - df : DataFrame, l'ensemble de données à analyser
     """
+    fonction_taux_remplissage_features(df)
     
     colonnes_a_garder = []
 
