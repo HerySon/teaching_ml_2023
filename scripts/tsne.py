@@ -52,7 +52,20 @@ def plot_tsne(tsne_matrix, clusters_array, cmap=plt.get_cmap('tab20c')):
     plt.plot()
     plt.show()
 
-def test_tsne_perplexity(perplexities, df, clusters_array, cmap=plt.get_cmap('tab20c'), **kwargs):
+def fit_multiple_perplexity(perplexities, df, init='pca', n_components=2, learning_rate='auto', n_iter=1000):
+    tsne_perplexity = perplexities
+    results = {}
+    for perplexity in tsne_perplexity:
+        results[perplexity] = TSNE(n_components=n_components, perplexity=perplexity, init=init, learning_rate=learning_rate, n_iter=n_iter).fit(df)
+    return results
+
+def transform_multiple_tsne(tsnes, df):
+    results = {}
+    for key, tsne in tsnes.items():
+        results[key] = tsne.fit_transform(df)
+    return results
+
+def plot_tsne_perplexity(perplexities, df, clusters_array, cmap=plt.get_cmap('tab20c'), **kwargs):
     """Plot tsne using multiple perplexities
     Args:
         perplexities (array): perplexities to use to plot
@@ -73,8 +86,8 @@ def test_tsne_perplexity(perplexities, df, clusters_array, cmap=plt.get_cmap('ta
     results = {}
     
     for perplexity in tsne_perplexity:
-        tsne = TSNE(n_components=n_components, perplexity=perplexity, init=init, learning_rate=learning_rate, n_iter=n_iter)
-        results[perplexity] = tsne.fit_transform(df)
+        tsnes = fit_multiple_perplexity(tsne_perplexity, df, n_components=n_components, init=init, learning_rate=learning_rate, n_iter=n_iter)
+        results = transform_multiple_tsne(tsnes, df)
         fig, axs = plt.subplots(len(perplexities), figsize=(30, 30))
 
         for index, perplexity in enumerate(results):
@@ -116,14 +129,14 @@ if __name__ == "__main__":
     kmeans_result = kmeans.fit_predict(tsne_df)
 
 
-    # Basic tsne
-    tsne = fit_tsne(tsne_df)
-    result = transform_tnse(tsne=tsne, df=tsne_df)
-    plot_tsne(result, kmeans_result)
-    print("Kullback-Leibler divergence score : " + str(get_kl_divergence_score(tsne)))
+    ## Basic tsne
+    #tsne = fit_tsne(tsne_df)
+    #result = transform_tnse(tsne=tsne, df=tsne_df)
+    #plot_tsne(result, kmeans_result)
+    #print("Kullback-Leibler divergence score : " + str(get_kl_divergence_score(tsne)))
 
     # Plotting multiple tsne based on perplexity hyperparameter
-    #test_tsne_perplexity([10, 50, 100], tsne_df, kmeans_result)
+    plot_tsne_perplexity([10, 50, 100], tsne_df, kmeans_result)
 
 
 
