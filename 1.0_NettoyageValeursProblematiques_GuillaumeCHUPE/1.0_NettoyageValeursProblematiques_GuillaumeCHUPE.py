@@ -1,4 +1,7 @@
-#1.0_NettoyageValeursProblematiques_GuillaumeCHUPE
+import pandas as pd
+import numpy as np
+from sklearn.impute import KNNImputer
+from sklearn.impute import SimpleImputer
 
 def drop_columns_with_missing_values(data, threshold=0.3):
     """
@@ -23,23 +26,64 @@ def drop_columns_with_missing_values(data, threshold=0.3):
     return cleaned_data
 
 
-def impute_missing_values(data):
+def impute_missing_values(data, columns=None, missing_values='NaN', n_neighbors=5, weights='uniform'):
     """
-    Imputes missing values using the K-Nearest Neighbor algorithm with default settings.
+    Imputes missing values using the K-Nearest Neighbor algorithm with specified settings.
 
     Parameters:
     data (DataFrame): the dataset to clean
+    columns (list): list of columns to impute missing values in. Default is None, in which case all columns are imputed.
+    missing_values (float or str): the placeholder for missing values. Default is 'NaN'.
+    n_neighbors (int): the number of neighbors to use. Default is 5.
+    weights (str or callable): the weight function used in prediction. Default is 'uniform'.
 
     Returns:
     DataFrame: the cleaned dataset
     """
-    # Create an instance of the KNNImputer class
-    imputer = KNNImputer()
+    # If columns are not specified, impute all columns
+    if columns is None:
+        columns = data.columns
+
+    # Check if columns are numeric
+    if not all(data[col].dtype.kind in ['i', 'u', 'f'] for col in columns):
+        raise ValueError('All columns to be imputed must be numeric.')
+
+    # Create an instance of the KNNImputer class with specified parameters
+    imputer = KNNImputer(missing_values=missing_values, n_neighbors=n_neighbors, weights=weights)
 
     # Impute missing values
-    imputed_data = imputer.fit_transform(data)
+    imputed_data = data.copy()
+    imputed_data[columns] = imputer.fit_transform(imputed_data[columns])
 
-    # Convert the numpy array back to a DataFrame
-    cleaned_data = pd.DataFrame(imputed_data, columns=data.columns)
+    return imputed_data
 
-    return cleaned_data
+
+def univariate_imputation(data, columns=None, strategy='mean', missing_values=np.nan):
+    """
+    Imputes missing values using the specified univariate imputation strategy.
+
+    Parameters:
+    data (DataFrame): the dataset to clean
+    columns (list): list of columns to impute missing values in. Default is None, in which case all columns are imputed.
+    strategy (str): the imputation strategy. Default is 'mean'.
+    missing_values (float or str): the placeholder for missing values. Default is np.nan.
+
+    Returns:
+    DataFrame: the cleaned dataset
+    """
+    # If columns are not specified, impute all columns
+    if columns is None:
+        columns = data.columns
+
+    # Check if columns are numeric
+    if not all(data[col].dtype.kind in ['i', 'u', 'f'] for col in columns):
+        raise ValueError('All columns to be imputed must be numeric.')
+
+    # Create an instance of the SimpleImputer class with specified parameters
+    imputer = SimpleImputer(missing_values=missing_values, strategy=strategy)
+
+    # Impute missing values
+    imputed_data = data.copy()
+    imputed_data[columns] = imputer.fit_transform(imputed_data[columns])
+
+    return imputed_data
