@@ -11,6 +11,9 @@ scikit-learn >=1.2.2
 seaborn
 plotly
 
+# Visualisation
+wordcloud
+
 # nlp
 #gensim
 #spacy
