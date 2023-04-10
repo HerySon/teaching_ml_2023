@@ -33,11 +33,11 @@ def data_with_less_30_nan(data):
 
 
 
-print(data.info())
+# print(data.info())
 
-data_cleaned = data_with_less_30_nan(data) 
+# data_cleaned = data_with_less_30_nan(data) 
 
-print (data_cleaned.info())
+# print (data_cleaned.info())
 
 
 
@@ -69,13 +69,13 @@ def imput_missing_values(numerical_data):
 
 
 ## lets take only the numerical columns (float,int..)
-numerical_columns = data_cleaned.select_dtypes(include=[np.number])
+# numerical_columns = data_cleaned.select_dtypes(include=[np.number])
 
-# we want to create a new DataFrame with only the selected columns
-numerical_data = data[numerical_columns.columns]
-print(numerical_data.head())
+# # we want to create a new DataFrame with only the selected columns
+# numerical_data = data[numerical_columns.columns]
+# print(numerical_data.head())
 
-data_preprocessed  = imput_missing_values(numerical_data)
-print(data_preprocessed.head())
+# data_preprocessed  = imput_missing_values(numerical_data)
+# print(data_preprocessed.head())
 
 
