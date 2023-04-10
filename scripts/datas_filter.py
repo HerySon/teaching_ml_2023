@@ -3,9 +3,38 @@ import numpy as np
 
 class datas_filter():
     def __init__(self) -> None:
+        self.dtypes_list = ["int8", "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64"]
         pass
 
-    def filter(self, datas: pd.DataFrame, type : str = "numerical", category_count : int = 100, nan_percent : int = 0) -> pd.DataFrame:
+
+    def _get_type_by_range(self, minvalue, maxvalue):
+        """Permet de récupérer le type de données le plus adapté pour une feature
+            minvalue : int
+                Valeur minimale de la feature
+            maxvalue : int
+                Valeur maximale de la feature
+            return : str
+                Type de données le plus adapté
+        """
+        # On vérifie que les valeurs en entrée soient du bon type
+        assert isinstance(minvalue, np.int64), "minvalue doit être un int64"
+        assert isinstance(maxvalue, np.int64), "maxvalue doit être un int64"
+
+        # On parcourt les types de données
+        for dtype in self.dtypes_list:
+            # On vérifie que la valeur minimale soit supérieure à 0 pour les types de données unsigned
+            if minvalue > 0 and "u" not in dtype:
+                continue
+            # On vérifie que la valeur minimale et maximale soient dans le range du type de données
+            if minvalue >= np.iinfo(dtype).min and maxvalue <= np.iinfo(dtype).max:
+                # On retourne le type de données
+                return dtype
+        else:
+            # On retourne "notFound" si aucun type de données n'est trouvé
+            return "notFound"
+
+
+    def filter(self, datas: pd.DataFrame, type : str = "numerical", category_count : int = 100, nan_percent : int = 0, ordinal_features_names : list = ["ecoscore_grade", "nutriscore_grade"]) -> pd.DataFrame:
         """Permet de filtrer les données en entrée
             datas : pd.DataFrame
                 Données en entrée
@@ -17,7 +46,7 @@ class datas_filter():
                     "non-ordinales" : catégories non-ordinales,
                     "categorical" : catégories ordinales et non-ordinales, 
             category_count : int
-                Nombre de catégories maximum pour une feature 
+                Nombre de catégories maximum pour une feature
                 (Ne fonctionne que si type != "numerical")
             nan_percent : int
                 Pourcentage de valeurs manquantes maximum pour une feature
@@ -28,6 +57,8 @@ class datas_filter():
         assert isinstance(datas, pd.DataFrame), "datas doit être un pd.DataFrame"
         assert isinstance(type, str), "type doit être un str"
         assert isinstance(category_count, int), "category_count doit être un int"
+        assert isinstance(nan_percent, int) or nan_percent >= 0 or nan_percent <= 100, "nan_percent doit être un int entre 0 et 100"
+        assert isinstance(ordinal_features_names, list) or ordinal_features_names is None, "ordinal_features_names doit être une liste"
 
         # On vérifie que le type soit valide
         assert type in ["numerical", "ordinal", "non-ordinal", "categorical"], "type doit être dans ['numerical', 'ordinal', 'non-ordinal', 'categorical']"
@@ -39,12 +70,11 @@ class datas_filter():
             # On récupère les features numériques
             features = datas.select_dtypes(include=["integer", "float"]).columns
         elif type == "ordinal":
+            if ordinal_features_names is None:        
+                # On retourne le dataframe vide
+                return pd.DataFrame()
             # On récupère les features catégorielles ordinales
-            features = datas.select_dtypes(include=["category"]).columns
-            for feature in features:
-                # On vérifie que la feature soit ordonnée et qu'elle ne contienne pas trop de catégories
-                if not datas[feature].cat.ordered or datas[feature].nunique() > category_count:
-                    features = features.drop(feature)
+            features = ordinal_features_names
         elif type == "non-ordinal":
             # On récupère les features catégorielles non-ordinales
             features = datas.select_dtypes(include=["category"]).columns
@@ -60,18 +90,26 @@ class datas_filter():
         return result_df.drop(list(nans_to_select.index), axis=1)
 
 
-    def downcast(self, datas: pd.DataFrame, features = None) -> pd.DataFrame:
+    def downcast(self, datas: pd.DataFrame, features = None, show_saved_memory : bool = False) -> pd.DataFrame:
         """Permet de réduire la taille mémoire des données
             datas : pd.DataFrame
                 Données en entrée
             features : list
                 Liste des features à réduire
+                Si None, toutes les features seront réduites
+            show_saved_memory : bool
+                Affiche la taille mémoire des données avant et après réduction
             return : pd.DataFrame
                 Données réduites
         """
         # On vérifie que les données en entrée soient du bon type
         assert isinstance(datas, pd.DataFrame), "datas doit être un pd.DataFrame"
         assert isinstance(features, list) or features is None, "features doit être une liste"
+        assert isinstance(show_saved_memory, bool), "show_saved_memory doit être un bool"
+
+        if show_saved_memory:
+            # On sauvegarde la taille mémoire des données avant filtrage
+            before = datas.memory_usage(index=False, deep=True).sum()
 
         # Si aucune feature n'est spécifiée, on prend toutes les features
         if features is None:
@@ -87,11 +125,20 @@ class datas_filter():
                 datas[feature] = datas[feature].astype("category")
                 continue
             elif datas[feature].dtype == "int64":
-                datas[feature] = pd.to_numeric(datas[feature], downcast="integer")
-                continue
+                # On récupère le type de données le plus adapté
+                dtype = self._get_type_by_range(datas[feature].min(), datas[feature].max())
+                if dtype == "notFound":
+                    continue
+                # On réduit la feature
+                datas[feature] = datas[feature].astype(dtype)
             elif datas[feature].dtype == "float64":
-                datas[feature] = pd.to_numeric(datas[feature], downcast="float")
-                continue
+                datas[feature] = datas[feature].astype("float16")
+        if show_saved_memory:
+            # On sauvegarde la taille mémoire des données après filtrage
+            after = datas.memory_usage(index=False, deep=True).sum()
+            print(f"Taille mémoire des données avant filtrage : {before} octets")
+            print(f"Taille mémoire des données après filtrage : {after} octets")
+            print(f"Taille mémoire des données sauvegardée : {before - after} octets")
         return datas
         
 
@@ -101,18 +148,14 @@ if __name__ == "__main__":
     datas = pd.DataFrame({"a": [1, 2, 3], "b": [1.0, 2.0, 3.0], "c": ["a", "b", "c"], 
                           "d": [1, 2.0, "c"], "e": [1, 2.0, 2], "f": [1, 2000, np.nan],
                           "g": ["a", "b", "b"], "h": ["a", "a", "a"], "i": ["low", "medium", "high"]})
-    print("Avant downcast :")
-    print(datas.dtypes)
-    datas = filter.downcast(datas)
-    print("Après downcast :")
-    print(datas.dtypes)
+    datas = filter.downcast(datas, show_saved_memory=True)
 
     # Exemple filter
     print("Mise en place des filtres :")
     print("Colones numériques : ")
     print(list(filter.filter(datas, type="numerical", nan_percent=34).columns))
     print("Colones ordinales : ")
-    print(list(filter.filter(datas, type="ordinal").columns))
+    print(list(filter.filter(datas, type="ordinal", ordinal_features_names=["i"]).columns))
     print("Colones non-ordinales (max 2): ")
     print(list(filter.filter(datas, type="non-ordinal", category_count=2).columns))
     print("Colones catégorielles : ")
