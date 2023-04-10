@@ -1,5 +1,3 @@
-#3.0_GererValeursAberrantes_GC
-
 def remove_negative_values(data, columns):
     """
     Removes negative values from specified columns of the dataframe.
@@ -53,5 +51,25 @@ def remove_outliers_zscore(data, columns, threshold=3):
     for col in columns:
         z_scores = (data[col] - data[col].mean()) / data[col].std()
         data = data[abs(z_scores) <= threshold]
+    return data
+
+from sklearn.ensemble import IsolationForest
+
+def remove_outliers_iforest(data, columns, contamination=0.05):
+    """
+    Removes outliers from specified columns of the dataframe using the IsolationForest method.
+
+    Args:
+        data (pandas.DataFrame): Dataframe to modify.
+        columns (list): List of column names to modify.
+        contamination (float): Proportion of outliers expected in the dataset (default 0.05).
+
+    Returns:
+        pandas.DataFrame: Modified dataframe.
+    """
+    clf = IsolationForest(contamination=contamination, random_state=42)
+    clf.fit(data[columns])
+    y_pred = clf.predict(data[columns])
+    data = data[y_pred == 1]
     return data
 
