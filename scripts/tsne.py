@@ -1,0 +1,130 @@
+import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE
+from data_loader import get_data
+from sklearn.cluster import KMeans
+from utils import drop_cols_fullna, std_scale_df, get_num_feats
+
+def fit_tsne(df, perplexity=50, init='pca', n_components=2, learning_rate='auto', n_iter=1000):
+    """Output tnse fitted model with provided hyperparameters and df
+    Args:
+        df (DataFrame): pandas dataframe
+        perplexity (integer, optional): tsne hyperparameter
+        init (string | ndarray, optional): tsne hyperparameter
+        n_components (integer, optional): tsne hyperparameter
+        learning_rate (float | string , optional): tsne hyperparameter
+        n_iter (int , optional): tsne hyperparameter
+    Returns:
+        tsne: Return fitted tsne model
+    @Author: Nicolas THAIZE
+    """
+    tsne = TSNE(n_components=n_components, perplexity=perplexity, init=init, learning_rate=learning_rate, n_iter=n_iter).fit(df)
+    return tsne
+
+def transform_tnse(tsne, df):
+    """Transform dataset using fitted tsne model
+    Args:
+        tsne (tsne): Fitted tsne model
+        df (DataFrame): pandas dataframe
+    Returns:
+        tsne: Return fitted tsne model
+    @Author: Nicolas THAIZE
+    """
+    return tsne.fit_transform(df)
+
+def plot_tsne(tsne_matrix, clusters_array, cmap=plt.get_cmap('tab20c')):
+    """Plot tsne transformed df
+    Args:
+        tsne_matrix (ndarray): 2D matrix of transformed values
+        clusters_array (ndarray): 1D matrix of cluster labels for each entries
+        cmap (Colormap): colors to use to paint clusters
+    Returns:
+    @Author: Nicolas THAIZE
+    """
+    fig, ax = plt.subplots(figsize=(10, 10))
+    for i in range(tsne_matrix.shape[0]):
+        cval = cmap(clusters_array[i])
+        ax.scatter(tsne_matrix[i][0], tsne_matrix[i][1], marker='.', color=cval)
+        ax_title = 'Représentation en 2D du dataset avec clustering'
+        ax.set_title(ax_title)
+        ax.set_xlabel('premier t-SNE')
+        ax.set_ylabel('deuxieme t-SNE')
+
+    plt.plot()
+    plt.show()
+
+def test_tsne_perplexity(perplexities, df, clusters_array, cmap=plt.get_cmap('tab20c'), **kwargs):
+    """Plot tsne using multiple perplexities
+    Args:
+        perplexities (array): perplexities to use to plot
+        df (DataFrame): pandas dataframe
+        clusters_array (ndarray): 1D matrix of cluster labels for each entries
+        cmap (Colormap): colors to use to paint clusters
+        kwargs (): Hyperparameters of tsne
+    Returns:
+    @Author: Nicolas THAIZE
+    """
+    perplexity = kwargs.get("perplexity", 50)
+    init = kwargs.get("init", 'pca')
+    n_components = kwargs.get("n_components", 2)
+    learning_rate = kwargs.get("learning_rate", "auto")  
+    n_iter = kwargs.get("n_iter", 1000)  
+    
+    tsne_perplexity = perplexities
+    results = {}
+    
+    for perplexity in tsne_perplexity:
+        tsne = TSNE(n_components=n_components, perplexity=perplexity, init=init, learning_rate=learning_rate, n_iter=n_iter)
+        results[perplexity] = tsne.fit_transform(df)
+        fig, axs = plt.subplots(len(perplexities), figsize=(30, 30))
+
+        for index, perplexity in enumerate(results):
+            currentAxis = axs[index]
+            X_tsne = results[perplexity]
+            for i in range(X_tsne.shape[0]):
+                cval = cmap(clusters_array[i])
+                currentAxis.scatter(X_tsne[i][0], X_tsne[i][1], marker='.', color=cval)
+                ax_title = 'Représentation en 2D du dataset avec cluster perplexity = ' + str(perplexity)
+                currentAxis.set_title(ax_title)
+                currentAxis.set_xlabel('premier t-SNE')
+                currentAxis.set_ylabel('deuxieme t-SNE')
+    plt.plot()
+    plt.show()
+
+def get_kl_divergence_score(tsne):
+    """Return Kullback-Leibler divergence score 
+    Args:
+        tsne (tsne): Fitted tsne model
+    Returns:
+        kl_divergence_: Return kl divergence score for provided tsne fitted&transformed model
+    @Author: Nicolas THAIZE
+    """
+    return tsne.kl_divergence_
+
+
+
+if __name__ == "__main__":
+    data = get_data(file_path = "./data/en.openfoodfacts.org.products.csv", nrows=1000)
+    
+    #Data preparation
+    tsne_df = get_num_feats(data)
+    tsne_df = drop_cols_fullna(tsne_df)
+    tsne_df = tsne_df.fillna(tsne_df.mean())
+    tsne_df = std_scale_df(tsne_df)
+
+    # Naive clustering, should be remplaced by elaborated clustering 
+    kmeans = KMeans(n_clusters=10, random_state=0)
+    kmeans_result = kmeans.fit_predict(tsne_df)
+
+
+    # Basic tsne
+    tsne = fit_tsne(tsne_df)
+    result = transform_tnse(tsne=tsne, df=tsne_df)
+    plot_tsne(result, kmeans_result)
+    print("Kullback-Leibler divergence score : " + str(get_kl_divergence_score(tsne)))
+
+    # Plotting multiple tsne based on perplexity hyperparameter
+    #test_tsne_perplexity([10, 50, 100], tsne_df, kmeans_result)
+
+
+
+# TODO : Commentaires, Pydoc, hyperparamètres de tsne dans fonction parent, tests unitaires (shape de sortie)
