@@ -1,3 +1,7 @@
+import pandas as pd
+import numpy as np
+
+df = pd.read_csv(r"C:\Users\Fnac\Desktop\Trello ML\Trello_git/teaching_ml_2023/dataset_clean.csv", encoding='utf-8')
 
 def scale_data(df, method):
   
@@ -36,3 +40,5 @@ def scale_data(df, method):
 
     # Retourner le jeu de données mis à l'échelle
     return df
+
+scale_data(df, "Robust")
