@@ -1,7 +1,24 @@
 import pandas as pd
 
 def handle_outliers(df: pd.DataFrame, how: str = 'standard', numeric_cols: list = None) -> pd.DataFrame:
+    """
+    This function takes a pandas DataFrame as input and returns a cleaned DataFrame
+    with the outliers handled according to the specified method.
     
+    Parameters:
+    -----------
+    dataset : pandas.DataFrame
+        The input dataset.
+    how : str, optional (default='standard')
+        The method to handle outliers. Possible values are:
+        - 'standard': Remove observations with values outside the range Q1-1.5IQR and Q3+1.5IQR.
+        - 'winsorize': Winsorize the outliers by replacing them with the nearest non-outlier value.
+    
+    Returns:
+    --------
+    pandas.DataFrame
+        The cleaned dataset with outliers handled.
+    """    
 # Set default columns for scaling if not provided
     if numeric_cols is None:
         numeric_cols = ['energy_100g', 'fat_100g', 'carbohydrates_100g', 'proteins_100g']
