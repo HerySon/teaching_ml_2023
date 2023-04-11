@@ -95,6 +95,16 @@ class Preprocessing:
         self.impute_categorical_features()
         self.display_missing_values()
 
+    # Function to convert categorical features to numeric
+    def convert_categorical_features_to_numeric(self):
+        print("\nPerforming categorical features convertion")
+
+        df_cat = self.df.select_dtypes(include=["object"])
+
+        for col in df_cat.columns.tolist():
+            self.df[col] = self.df[col].astype('category')
+            self.df[col] = self.df[col].cat.codes
+
     # Function to preprocess the Dataframe
     def preprocessing(self):
         
@@ -103,6 +113,8 @@ class Preprocessing:
         self.drop_missing_values()
 
         self.impute_missing_values()
+
+        self.convert_categorical_features_to_numeric()
     
         return self.df
         
