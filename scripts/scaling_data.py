@@ -1,28 +1,40 @@
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-def scaling_data(dataset, how='standard'):
+def scaling_data(df: pd.DataFrame, how: str = 'standard', numeric_cols: list = None) -> pd.DataFrame:
     """
-    Cette fonction prend en entrée un dataset au format CSV et applique le scaling
-    des données selon la méthode choisie (MinMax ou Standard).
-    La fonction renvoie un DataFrame avec les données scalées.
+    Applies scaling to numeric columns of a DataFrame according to the chosen method.
+
+    Parameters:
+    -----------
+    df: pd.DataFrame
+        The DataFrame to scale.
+    how: str, optional (default='standard')
+        The scaling method to use. Either 'standard' for standard scaling or 'minmax'
+        for min-max scaling.
+    numeric_cols: list, optional (default=None)
+        The list of column names to scale. If None, uses default list of columns.
+
+    Returns:
+    --------
+    pd.DataFrame
+        A DataFrame with the scaled numeric columns.
     """
-    df = pd.read_csv(dataset, delimiter='\t', low_memory=False)
+    # Set default columns for scaling if not provided
+    if numeric_cols is None:
+        numeric_cols = ['energy_100g', 'fat_100g', 'carbohydrates_100g', 'proteins_100g']
     
-    # Sélectionner les colonnes pour le scaling
-    numeric_cols = ['energy_100g', 'fat_100g', 'carbohydrates_100g', 'proteins_100g']
-    
-    # Remplacer les valeurs manquantes par la médiane de chaque colonne
+    # Replace missing values ​​with the median of each column
     df[numeric_cols] = df[numeric_cols].fillna(df[numeric_cols].median())
     
-    # Créer le scaler correspondant
+    # Create the corresponding scaler
     if how == 'minmax':
         scaler = MinMaxScaler()
     else:
         scaler = StandardScaler()
     
-    # Appliquer le scaling aux colonnes numériques
+    # Apply scaling to numeric columns
     df[numeric_cols] = scaler.fit_transform(df[numeric_cols])
     
-    # Renvoyer le DataFrame avec les données scalées
+    # Return DataFrame with scaled data
     return df
