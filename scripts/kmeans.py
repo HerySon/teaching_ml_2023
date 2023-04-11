@@ -30,6 +30,7 @@ def kmeans(dataset, k_min=2, k_max=10, elbow_choice='inertias', inp_algo='lloyd'
     
     # Verifying if dataset input is a pd.DataFrame().
     assert_equal(type(dataset), type(pd.DataFrame()), err_msg='Input is not Pandas Dataframe.', verbose=True)
+    assert elbow_choice == 'inertias' or elbow_choice == 'distortions', 'You should choose between "inertias" or "distortions" values for elbow_choice.'
     for i in dataset.columns:
         assert dataset[i].dtype in [type(int()), type(float()), np.int64().dtype, np.int32().dtype, np.float64().dtype,
                                     np.float32().dtype], f'{i} column of the dataset is not numeric type. Please ' \
