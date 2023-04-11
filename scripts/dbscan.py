@@ -38,5 +38,4 @@ def dbscan(dataset, inp_eps=0.5, inp_algo='auto', inp_metric='euclidean', inp_mi
                          f'trying to fit DBSCAN.')
     model = DBSCAN(algorithm=inp_algo, eps=inp_eps, metric=inp_metric, min_samples=inp_min_samp)
     assert_equal(type(model), type(DBSCAN()), err_msg='Output will not be DBSCAN class instance.', verbose=True)
-    model.fit(dataset)
-    return model
+    return model.fit(dataset)
