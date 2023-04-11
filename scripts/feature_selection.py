@@ -42,17 +42,17 @@ class FeatureSelection:
         var_thr.fit(self.df)
         var_thr.get_support()
         low_var_feats = [column for column in self.df.columns if column not in self.df.columns[var_thr.get_support()]]
-        return self.df.drop(low_var_feats,axis=1)
+        return self.df.drop(low_var_feats,axis=1, inplace=True)
 
 if __name__ == "__main__":
 
     # Unit testing FeatureSelection 
     class TestFeatureSelection(unittest.TestCase):
         def test_shape(self):
-            df = get_data(file_path = "./data/en.openfoodfacts.org.products.csv", nrows=50)
+            df = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=50)
             feature_selection = FeatureSelection(df)
-            features_selected = feature_selection.drop_low_var_feats()
-            self.assertNotEqual(df.shape, features_selected.shape, "Shapes are not same size")
+            feature_selection.drop_low_var_feats()
+            self.assertNotEqual(df.shape, feature_selection.shape, "Shapes are not same size")
 
         def test_cols(self):
             def isSubset(arr1, arr2):
@@ -68,10 +68,10 @@ if __name__ == "__main__":
                         return False
                 return True
 
-            df = get_data(file_path = "./data/en.openfoodfacts.org.products.csv", nrows=50)
+            df = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=50)
             feature_selection = FeatureSelection(df)
-            features_selected = feature_selection.drop_low_var_feats()
-            assert_val = isSubset(df.columns.to_list(), features_selected.columns.to_list())
+            feature_selection.drop_low_var_feats()
+            assert_val = isSubset(df.columns.to_list(), feature_selection.columns.to_list())
 
             self.assertTrue(assert_val, "Cols are not included")
     
