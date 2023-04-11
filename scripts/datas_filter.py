@@ -25,7 +25,7 @@ class datas_filter():
             # On vérifie que la valeur minimale soit supérieure à 0 pour les types de données unsigned
             if minvalue > 0 and "u" not in dtype:
                 continue
-            # On vérifie que la valeur minimale et maximale soient dans le range du type de données
+            # On vérifie que la valeur minimale et maximale soient dans la range du type de données
             if minvalue >= np.iinfo(dtype).min and maxvalue <= np.iinfo(dtype).max:
                 # On retourne le type de données
                 return dtype
@@ -34,22 +34,26 @@ class datas_filter():
             return "notFound"
 
 
-    def filter(self, datas: pd.DataFrame, type : str = "numerical", category_count : int = 100, nan_percent : int = 0, ordinal_features_names : list = ["ecoscore_grade", "nutriscore_grade"]) -> pd.DataFrame:
+    def filter(self, datas: pd.DataFrame, type : str = "number", 
+               category_count : int = 100, nan_percent : int = 0, 
+               ordinal_features_names : list = ["ecoscore_grade", "nutriscore_grade"]) -> pd.DataFrame:
         """Permet de filtrer les données en entrée
             datas : pd.DataFrame
                 Données en entrée
             type : str
                 Type de données à filtrer
                 Valeurs possibles : 
-                    "numerical" : valeurs numériques, 
+                    "number" : valeurs numériques, 
                     "ordonal" : catégories ordinales, 
                     "non-ordinales" : catégories non-ordinales,
                     "categorical" : catégories ordinales et non-ordinales, 
             category_count : int
                 Nombre de catégories maximum pour une feature
-                (Ne fonctionne que si type != "numerical")
+                (Ne fonctionne que si type != "number")
             nan_percent : int
                 Pourcentage de valeurs manquantes maximum pour une feature
+            ordinal_features_names : list
+                Liste du nom des features catégorielles ordinales
             return : pd.DataFrame
                 Données filtrées
         """
@@ -61,12 +65,12 @@ class datas_filter():
         assert isinstance(ordinal_features_names, list) or ordinal_features_names is None, "ordinal_features_names doit être une liste"
 
         # On vérifie que le type soit valide
-        assert type in ["numerical", "ordinal", "non-ordinal", "categorical"], "type doit être dans ['numerical', 'ordinal', 'non-ordinal', 'categorical']"
+        assert type in ["number", "ordinal", "non-ordinal", "categorical"], "type doit être dans ['number', 'ordinal', 'non-ordinal', 'categorical']"
 
         # On vérifie que le nombre de catégories soit valide
         assert category_count > 0, "category_count doit être supérieur à 0"
 
-        if type == "numerical":
+        if type == "number":
             # On récupère les features numériques
             features = datas.select_dtypes(include=["integer", "float"]).columns
         elif type == "ordinal":
@@ -75,16 +79,14 @@ class datas_filter():
                 return pd.DataFrame()
             # On récupère les features catégorielles ordinales
             features = ordinal_features_names
-        elif type == "non-ordinal":
+        elif type == "non-ordinal" or type == "categorical":
             # On récupère les features catégorielles non-ordinales
             features = datas.select_dtypes(include=["category"]).columns
-            for feature in features:
-                # On vérifie que la feature ne soit pas ordonnée et qu'elle ne contienne pas trop de catégories
-                if datas[feature].cat.ordered or datas[feature].nunique() > category_count:
-                    features = features.drop(feature)
-        elif type == "categorical":
-            # On récupère les features catégorielles
-            features = datas.select_dtypes(include=["category"]).columns
+            if type == "non-ordinal":
+                for feature in features:
+                    # On vérifie que la feature ne soit pas ordonnée et qu'elle ne contienne pas trop de catégories
+                    if datas[feature].cat.ordered or datas[feature].nunique() > category_count:
+                        features = features.drop(feature)
         result_df = datas[features]
         nans_to_select = result_df.isna().sum()[result_df.isna().sum() / result_df.shape[0] * 100 > nan_percent]
         return result_df.drop(list(nans_to_select.index), axis=1)
@@ -153,7 +155,7 @@ if __name__ == "__main__":
     # Exemple filter
     print("Mise en place des filtres :")
     print("Colones numériques : ")
-    print(list(filter.filter(datas, type="numerical", nan_percent=34).columns))
+    print(list(filter.filter(datas, type="number", nan_percent=34).columns))
     print("Colones ordinales : ")
     print(list(filter.filter(datas, type="ordinal", ordinal_features_names=["i"]).columns))
     print("Colones non-ordinales (max 2): ")
