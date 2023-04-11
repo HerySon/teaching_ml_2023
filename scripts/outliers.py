@@ -18,6 +18,8 @@ def outliers_process(df, columns, method = 'nan', k=1.5, sklearn_method=False):
             Will use IQR method to detect and remove outliers if set False, else will use IsolationForest method
     Returns:
         df_outliers : the dataframe with outliers handled
+    Author:
+        Joëlle Sabourdy
     """
     df_outliers = df.copy()
 
