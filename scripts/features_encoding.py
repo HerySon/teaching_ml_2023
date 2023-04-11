@@ -17,6 +17,8 @@ def non_numeric_features_encoder(df, columns, encoder_type=OrdinalEncoder, spars
     Returns:
         df : the encoded dataframe
         or sparse matrix and encoder if encoder_type=OneHotEncoder and sparse=True
+    Author:
+        Joëlle Sabourdy
     """
     # create a OrdinalEncoder/OneHotEncoder object
     if encoder_type == OrdinalEncoder:
