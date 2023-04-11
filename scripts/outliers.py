@@ -90,18 +90,16 @@ def outliers_process(df, columns, method = 'nan', k=1.5, sklearn_method=False):
 
 
 
-# Test
-
-# Consider dataset containing ramen rating
-df = pd.DataFrame({
-    'brand': ['Yum Yum', 'Yum Yum', 'Indomie', 'Indomie', 'Tanoshi', 'Cup Noodles'],
-    'style': ['cup', 'cup', 'cup', 'pack', 'pack', 'cup'],
-    'rating': [49, 4, 3.5, 1, 5, 2],
-    'grams': [80, 80, 80, 90, 90, 500]
-    })
-
-# Define numeric features to handle outliers
-columns = ['rating', 'grams']
-
-# Handle outliers in numeric features
-outliers_process(df, columns, method = 'mean', k=1.5, sklearn_method=True)
+if __name__ == "__main__":
+    # Consider dataset containing ramen rating
+    df = pd.DataFrame({
+        'brand': ['Yum Yum', 'Yum Yum', 'Indomie', 'Indomie', 'Tanoshi', 'Cup Noodles'],
+        'style': ['cup', 'cup', 'cup', 'pack', 'pack', 'cup'],
+        'rating': [49, 4, 3.5, 1, 5, 2],
+        'grams': [80, 80, 80, 90, 90, 500]
+        })
+    # Define numeric features to handle outliers
+    columns = ['rating', 'grams']
+    # Handle outliers in numeric features
+    df_out = outliers_process(df, columns, method = 'mean', k=1.5, sklearn_method=True)
+    print(df_out)
