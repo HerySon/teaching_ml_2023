@@ -68,22 +68,18 @@ def concat_matrix(df, columns, matrix, encoder):
 
 
 
-
-# Test
-
-# Consider dataset containing ramen rating
-df = pd.DataFrame({
-    'brand': ['Yum Yum', 'Yum Yum', 'Indomie', 'Indomie', 'Tanoshi', 'Cup Noodles'],
-    'style': ['cup', 'cup', 'cup', 'pack', 'pack', 'cup'],
-    'rating': [49, 4, 3.5, 1, 5, 2],
-    'grams': [80, 80, 80, 90, 90, 500]
-    })
-
-# Define non-numeric features to encode
-columns = ['brand', 'style']
-
-# Encore non-numeric features and get sparse matrix
-matrix, encoder = non_numeric_features_encoder(df, columns, encoder_type=OneHotEncoder, sparse=True)
-
-# Concat dataframe and sparse matrix
-concat_matrix(df, columns, matrix, encoder)
+if __name__ == "__main__":
+    # Consider dataset containing ramen rating
+    df = pd.DataFrame({
+        'brand': ['Yum Yum', 'Yum Yum', 'Indomie', 'Indomie', 'Tanoshi', 'Cup Noodles'],
+        'style': ['cup', 'cup', 'cup', 'pack', 'pack', 'cup'],
+        'rating': [49, 4, 3.5, 1, 5, 2],
+        'grams': [80, 80, 80, 90, 90, 500]
+        })
+    # Define non-numeric features to encode
+    columns = ['brand', 'style']
+    # Encore non-numeric features and get sparse matrix
+    matrix, encoder = non_numeric_features_encoder(df, columns, encoder_type=OneHotEncoder, sparse=True)
+    # Concat dataframe and sparse matrix
+    df_mat = concat_matrix(df, columns, matrix, encoder)
+    print(df_mat)
