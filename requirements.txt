@@ -1,15 +1,15 @@
 # packaging
 pip>=9
 setuptools>=26
-twine
 wheel>=0.29
 
 # data science
 numpy
-pandas
+pandas >2.0
 scikit-learn >=1.2.2
 seaborn
 plotly
+scipy > 1.24
 
 # nlp
 #gensim
