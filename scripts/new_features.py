@@ -3,7 +3,8 @@ import numpy as np
 
 def split_ean13(df, drop_ean13=False):
     """
-    This function split code column into 3 separate columns if it is digit and its length is 13.
+    This function split code column into 3 separate columns if it is digit, its length is 13 and don't start with 200
+    because Open Food Facts assigns a number starting with the 200 reserved prefix for products without a barcode.
     Code column is barcode of the product (can be EAN-13 or internal codes for some food stores).
     Position 1 to 3 : country code
     Position 3 to 7 : manufacturer code
@@ -33,6 +34,9 @@ def split_ean13(df, drop_ean13=False):
         # Check code length
         if len(ean) != 13:
             continue
+        # Check if code starts with 200
+        if ean.startswith('200'):
+            continue
         # Split EAN13
         prefix = ean[:3]
         company = ean[2:7]
@@ -42,7 +46,7 @@ def split_ean13(df, drop_ean13=False):
         df.at[i, 'EAN13_company'] = company
         df.at[i, 'EAN13_product'] = product
     
-    # Drop code column if specified
+    # Drop EAN13 column if specified
     if drop_ean13:
         df.drop('code', axis=1, inplace=True)
     
@@ -57,7 +61,7 @@ def split_ean13(df, drop_ean13=False):
 df = pd.DataFrame({
     'brand': ['Yum Yum', 'Yum Yum', 'Indomie', 'Indomie', 'Tanoshi', 'Cup Noodles'],
     'style': ['cup', 'cup', 'cup', 'pack', 'pack', 'cup'],
-    'code': ['1234567890123', '123456', '4567890123456', '', '0067890123456', '1234567890az3456']
+    'code': ['1234567890123', '123456', '2007890123456', '', '0067890123456', '1234567890az3456']
     })
 
 # Split code column
