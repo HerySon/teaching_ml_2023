@@ -62,6 +62,8 @@ def hie_clustering(df, modeltype=AgglomerativeClustering, n_clusters=2, linkage=
             Will plot the dendogram
     Return:
         sklearn cluster object
+    Author:
+        Joëlle Sabourdy
     """
     if linkage == 'ward' and metric != 'euclidean':
         metric='euclidean'
