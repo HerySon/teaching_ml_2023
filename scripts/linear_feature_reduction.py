@@ -48,6 +48,7 @@ def impute_missing(df):
     @Author: Nicolas THAIZE
     """
     temp_df = df.copy()
+    temp_df = get_num_feats(temp_df)
     temp_df = drop_cols_fullna(temp_df)
     return temp_df.fillna(temp_df.mean())
 
@@ -55,6 +56,7 @@ def pca_fit_df(df, n_components=False):
     """Fit a PCA on df
     Args:
         df (DataFrame, optional): pandas dataframe  
+        n_components (Int | float | str | None, optional) : number of components to create with pca
     Returns:
         pca: output pca object
     @Author: Nicolas THAIZE
@@ -111,7 +113,7 @@ def pca_plot_vars(pca, col_idx_1=2, col_idx_2=1):
     plt.show()
 
 if __name__ == "__main__":
-    df = get_data(file_path = "./data/en.openfoodfacts.org.products.csv", nrows=50)
+    df = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=50)
     prep_pca_df = impute_missing(df)
     prep_pca_df = std_scale_df(prep_pca_df)
 
