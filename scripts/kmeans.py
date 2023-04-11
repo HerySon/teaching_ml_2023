@@ -1,4 +1,4 @@
-def kmeans(dataset, k=8, inp_algo='lloyd', inp_init='k-means++', inp_n_init=10):
+def kmeans(dataset, k_min=2, k_max=10, elbow_choice='inertias', inp_algo='lloyd', inp_init='k-means++', inp_n_init=10):
     """
      This function will fit a KMeans model. You pass the OpenFoodFact dataset as entry and you get the fitted model at the end.
     You can precise the number of cluster expected.
@@ -6,7 +6,12 @@ def kmeans(dataset, k=8, inp_algo='lloyd', inp_init='k-means++', inp_n_init=10):
     Args :
         dataset -- the dataset who contains OpenFoodFact data (required)
         
-        k -- number of clusters -- Default = 8 (int)
+        k_min -- number of cluster minimum -- Default = 2 (int)
+        
+        k_max -- number of cluster maximum -- Default = 10 (int)
+        
+        elbow_choice -- whether to use inertias or distortions for elbow method.
+        Possible values are 'inertias' and 'distortions'. -- Default = 'inertias'
         
         inp_algo -- K-means algorithm to use. Possible values are ['lloyd', 'elkan', 'auto', 'full'] -- Default = 'lloyd'
         
@@ -34,5 +39,37 @@ def kmeans(dataset, k=8, inp_algo='lloyd', inp_init='k-means++', inp_n_init=10):
     assert_equal(dataset.isna().sum().sum(), 0,
                  err_msg=f'There is {dataset.isna().sum().sum()} NaN values in dataset, please preprocess them before '
                          f'trying to fit KMeans.')
+    
+    distortions = []
+    inertias = []
+    mapping1 = {}
+    mapping2 = {}
+    K = range(k_min, k_max)
+
+    for z in K:
+        # Building and fitting the model
+        kmeanModel = KMeans(n_clusters=z).fit(X)
+        kmeanModel.fit(X)
+
+        distortions.append(sum(np.min(cdist(X, kmeanModel.cluster_centers_,
+                                            'euclidean'), axis=1)) / X.shape[0])
+        inertias.append(kmeanModel.inertia_)
+
+        mapping1[k] = sum(np.min(cdist(X, kmeanModel.cluster_centers_,
+                                       'euclidean'), axis=1)) / X.shape[0]
+        mapping2[k] = kmeanModel.inertia_
+    
+    if elbow_choice == "inertias":
+        choice = inertias
+    elif elbow_choice == "distortions":
+        choice = distortions
+    plt.plot(K, choice, 'bx-')
+    plt.xlabel('Values of K')
+    plt.ylabel('Inertia')
+    plt.title('The Elbow Method using Inertia')
+    plt.show()
+    
+    k = input("Now choose a value for k :")
+    
     model = KMeans(n_clusters=k, random_state=13, algorithm=inp_algo, init=inp_init, n_init=inp_n_init)
     return model.fit(dataset)
