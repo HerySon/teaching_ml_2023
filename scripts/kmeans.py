@@ -35,5 +35,4 @@ def kmeans(dataset, k=8, inp_algo='lloyd', inp_init='k-means++', inp_n_init=10):
                  err_msg=f'There is {dataset.isna().sum().sum()} NaN values in dataset, please preprocess them before '
                          f'trying to fit KMeans.')
     model = KMeans(n_clusters=k, random_state=13, algorithm=inp_algo, init=inp_init, n_init=inp_n_init)
-    model.fit(dataset)
-    return model
+    return model.fit(dataset)
