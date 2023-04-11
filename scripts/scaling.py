@@ -7,7 +7,7 @@ def scale_fit_df_by_method(df, method, **kwargs):
     Args:
         df (DataFrame): dataframe
         method (string): Scaler to fit
-        kwags (any): Every scaler methods options
+        kwargs (any): Every scaler methods options
     Returns:
         scaler: fitted scaler object
     @Author: Nicolas THAIZE
@@ -54,7 +54,7 @@ def scale_transform_df(df, scaler):
     return df
 
 if __name__ == "__main__":
-    data = get_data(file_path = "./data/en.openfoodfacts.org.products.csv", nrows=50)
+    data = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=50)
     scaler = scale_fit_df_by_method(data, "std", with_mean=False)
     result = scale_transform_df(data, scaler)
     print(result.shape)
