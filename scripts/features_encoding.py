@@ -78,7 +78,7 @@ if __name__ == "__main__":
         })
     # Define non-numeric features to encode
     columns = ['brand', 'style']
-    # Encore non-numeric features and get sparse matrix
+    # Encode non-numeric features and get sparse matrix
     matrix, encoder = non_numeric_features_encoder(df, columns, encoder_type=OneHotEncoder, sparse=True)
     # Concat dataframe and sparse matrix
     df_mat = concat_matrix(df, columns, matrix, encoder)
