@@ -36,18 +36,17 @@ class FeatureSelection:
         
         @Author: Nicolas THAIZE
         """
-        temp_df = self.df.copy()
         if auto_ordinal_encode:
-            temp_df = self.ordinal_encoding(temp_df)
+            self.set_df(self.ordinal_encoding(self.df))
         var_thr = VarianceThreshold(threshold = threshold)
-        var_thr.fit(temp_df)
+        var_thr.fit(self.df)
         var_thr.get_support()
-        low_var_feats = [column for column in temp_df.columns if column not in temp_df.columns[var_thr.get_support()]]
+        low_var_feats = [column for column in self.df.columns if column not in self.df.columns[var_thr.get_support()]]
         return self.df.drop(low_var_feats,axis=1)
 
 if __name__ == "__main__":
 
-    # Unit testing FeatureSelection class
+    # Unit testing FeatureSelection 
     class TestFeatureSelection(unittest.TestCase):
         def test_shape(self):
             df = get_data(file_path = "./data/en.openfoodfacts.org.products.csv", nrows=50)
