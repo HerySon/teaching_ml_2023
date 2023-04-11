@@ -56,15 +56,13 @@ def split_ean13(df, drop_ean13=False):
 
 
 
-
-# Test
-
-# Consider dataset containing ramen product
-df = pd.DataFrame({
-    'brand': ['Yum Yum', 'Yum Yum', 'Indomie', 'Indomie', 'Tanoshi', 'Cup Noodles'],
-    'style': ['cup', 'cup', 'cup', 'pack', 'pack', 'cup'],
-    'code': ['1234567890123', '123456', '2007890123456', '', '0067890123456', '1234567890az3456']
-    })
-
-# Split code column
-split_ean13(df, drop_ean13=False)
+if __name__ == "__main__":
+    # Consider dataset containing ramen product
+    df = pd.DataFrame({
+        'brand': ['Yum Yum', 'Yum Yum', 'Indomie', 'Indomie', 'Tanoshi', 'Cup Noodles'],
+        'style': ['cup', 'cup', 'cup', 'pack', 'pack', 'cup'],
+        'code': [1234567890123, '123456', '2007890123456', '', '0067890123456', '1234567890az3456']
+        })
+    # Split code column
+    df = split_ean13(df, drop_ean13=False)
+    print(df)
