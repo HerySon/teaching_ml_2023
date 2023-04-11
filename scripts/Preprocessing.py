@@ -1,13 +1,10 @@
-import pandas as pd
-import numpy as np
-from statistics import mode
 from data_loader import *
-from sklearn.impute import KNNImputer
+import pandas as pd
 
 class Preprocessing:
 
-    d_df      = None
-    d_percent = 70
+    d_df        = None
+    d_percent   = 70
     d_num_imput = 'mean'
     d_cat_imput = 'mode'
 
@@ -35,7 +32,6 @@ class Preprocessing:
         if(self.count_duplicated_values() > 0):
             self.df.drop_duplicates(inplace=True)
         print("\nRows number after drop duplicated values : %s" % len(self.df))
-        return self.df
 
     # Functions to display missing values
     def display_missing_values(self): 
@@ -59,11 +55,9 @@ class Preprocessing:
         self.df.drop(list_calc_null, axis=1, inplace=True)
         print("\nNumber features after droping when %s percent of values are NULL : %s" % (self.percent, len(self.df.columns)))
 
-        return self.df
-
     # Function to impute numeric features missing values
     def impute_numeric_features(self):
-        print("\nPerforming numeric features imputation")
+        print("\nPerforming numeric features imputation ("+self.num_imput+")")
 
         df_num = self.df.select_dtypes(exclude=["object"])
 
@@ -81,11 +75,9 @@ class Preprocessing:
                 for col in df_num.columns.tolist():
                     self.df[col].fillna(self.df[col].mean(), inplace=True)
                    
-        return df_num
-
     # Function to impute categorical features missing values
     def impute_categorical_features(self):
-        print("\nPerforming categorical features imputation")
+        print("\nPerforming categorical features imputation ("+self.cat_imput+")")
 
         df_cat = self.df.select_dtypes(include=["object"])
 
@@ -97,14 +89,11 @@ class Preprocessing:
                 for col in df_cat.columns.tolist():
                     self.df[col].fillna(self.df[col].mode().iloc[0], inplace=True)
              
-        return df_cat
-
     # Function to impute missing values
     def impute_missing_values(self):
-        encode_df_num = self.impute_numeric_features()
-        encode_df_cat = self.impute_categorical_features()
-        final_df = pd.concat([encode_df_num, encode_df_cat], axis=1,sort=False)
-        return final_df
+        self.impute_numeric_features()
+        self.impute_categorical_features()
+        self.display_missing_values()
 
     # Function to preprocess the Dataframe
     def preprocessing(self):
@@ -114,10 +103,14 @@ class Preprocessing:
         self.drop_missing_values()
 
         self.impute_missing_values()
-
+    
+        return self.df
+        
 if __name__ == "__main__":
     v_file_path = r"D:\Python_app\teaching_ml_2023/data/en.openfoodfacts.org.products.csv"
     v_nrows     = 10000
 
-    df_train    = get_data(file_path=v_file_path, nrows=v_nrows)
-    df_train    = Preprocessing(df_train).preprocessing()
+    # Execute preprocessing
+    df_train = get_data(file_path=v_file_path, nrows=v_nrows)
+    df_train = Preprocessing(df_train).preprocessing()
+    print(df_train.head())
