@@ -11,10 +11,12 @@ def split_ean13(df, drop_ean13=False):
     Position 8 to 12 : product code
     Position 13 : check digit that will be removed
     Parameters:
-    - df : pandas dataframe (The input dataframe containing the EAN13 codes in a column named "code")
-    - drop_ean13 : bool (Default=False), drop code column if set True
+        df : pandas dataframe (The input dataframe containing the EAN13 codes in a column named "code")
+        drop_ean13 : bool (Default=False), drop code column if set True
     Returns:
-    - df : pandas dataframe with the separated EAN13 columns
+        df : pandas dataframe with the separated EAN13 columns
+    Author:
+        Joëlle Sabourdy
     """
     # Check if code column exists
     if 'code' not in df.columns:
