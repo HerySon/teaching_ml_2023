@@ -44,8 +44,9 @@ class Filtering:
             for end in endswith:
                 if feature.endswith(end):
                     feature_wendswith = feature.removesuffix(end)
-                    if invert and feature_wendswith in ft_list:
-                        ft_endswith.append(feature_wendswith)
+                    if invert:
+                        if feature_wendswith in ft_list:
+                            ft_endswith.append(feature_wendswith)
                     else:
                         ft_endswith.append(feature)
         df_endswith = self.df[ft_endswith]
@@ -74,7 +75,7 @@ class Filtering:
 
         self.drop_features(ft_wendswith)
 
-        # print(self.df[['ingredients_that_may_be_from_palm_oil_tags']].head(50))
+        print(self.df[['packaging_tags']].head(50))
     
         return self.df
         
