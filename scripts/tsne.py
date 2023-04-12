@@ -53,7 +53,7 @@ def transform_tnse(tsne, df):
         tsne (tsne): Fitted tsne model
         df (DataFrame): pandas dataframe
     Returns:
-        tsne: Return fitted tsne model
+        tsne: Return transformed df
     @Author: Nicolas THAIZE
     """
     return tsne.fit_transform(df)
@@ -80,6 +80,19 @@ def plot_tsne(tsne_matrix, clusters_array, cmap=plt.get_cmap('tab20c')):
     plt.show()
 
 def fit_multiple_perplexity(perplexities, df, init='pca', n_components=2, learning_rate='auto', n_iter=1000):
+    """Output an array of tnse fitted models with provided perplexities values
+    Args:
+        perplexities (array integer): array of perplexity values to use to fit tsne models
+        df (DataFrame): pandas dataframe
+        init (string | ndarray, optional): tsne hyperparameter
+        n_components (integer, optional): tsne hyperparameter
+        learning_rate (float | string , optional): tsne hyperparameter
+        n_iter (int , optional): tsne hyperparameter
+        kwargs (): Hyperparameters of tsne
+    Returns:
+        tsne: Return fitted tsne model
+    @Author: Nicolas THAIZE
+    """
     tsne_perplexity = perplexities
     results = {}
     for perplexity in tsne_perplexity:
@@ -87,6 +100,14 @@ def fit_multiple_perplexity(perplexities, df, init='pca', n_components=2, learni
     return results
 
 def transform_multiple_tsne(tsnes, df):
+    """Transform dataset using multiple fitted tsne models
+    Args:
+        tsnes (array tsne): Fitted tsne models
+        df (DataFrame): pandas dataframe
+    Returns:
+        results (dict): Return transformed df for each tsne provided
+    @Author: Nicolas THAIZE
+    """
     results = {}
     for key, tsne in tsnes.items():
         results[key] = transform_tnse(tsne, df)
