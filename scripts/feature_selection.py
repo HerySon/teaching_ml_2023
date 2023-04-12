@@ -2,12 +2,20 @@ from data_loader import get_data
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.feature_selection import VarianceThreshold
 import unittest
+import numpy as np
+import matplotlib.pyplot as plt
+
 
 class FeatureSelection:
     def __init__(self, df):
         self.df = df
 
     def set_df(self, df):
+        """Set df value provided in arg
+        Args:
+            df (DataFrame): Dataframe object
+        @Author: Nicolas THAIZE
+        """
         self.df = df
 
     def ordinal_encoding(self, df): 
@@ -43,8 +51,62 @@ class FeatureSelection:
         var_thr.get_support()
         low_var_feats = [column for column in self.df.columns if column not in self.df.columns[var_thr.get_support()]]
         return self.df.drop(low_var_feats,axis=1, inplace=True)
+    
+    def plot_dispertion_ratio(self, auto_ordinal_encode=True, threshold=1, plot_y_scale="log"):
+        """Plot dispertion ratio calculus on whole dataset 
+        Args:
+            auto_ordinal_encode (boolean, optional): If true, encode categorical features
+                By default True
+            threshold (integer, optional): min dispertion ratio value to display on plot
+                By default 1
+            plot_y_scale (string, optional): Change plot y axis scale
+                By default log
+        @Author: Nicolas THAIZE
+        """
+        if auto_ordinal_encode:
+            self.set_df(self.ordinal_encoding(self.df))
+
+        am = np.mean(self.df, axis=0)
+        gm = np.power(np.prod(self.df, axis=0), 1 / self.df.shape[0])
+        disp_ratio = am/gm
+        disp_ratio = disp_ratio[disp_ratio >= threshold].sort_values(ascending=False)
+        
+        fig, ax = plt.subplots()
+        plt.bar(disp_ratio.index, disp_ratio)
+        plt.yscale(plot_y_scale)
+        plt.xticks(rotation = 45)
+        fig.subplots_adjust(bottom=0.3)
+        plt.title('Dispertion ratio value (non +infinity) by column')
+        plt.ylabel('Dispertion ratio value (non +infinity)')
+        plt.xlabel('Column name')
+        plt.show()
+
+    def drop_columns_by_dispertion_ratio_value(self, auto_ordinal_encode=True, threshold=100):
+        """Plot dispertion ratio calculus on whole dataset 
+        Args:
+            auto_ordinal_encode (boolean, optional): If true, encode categorical features
+                By default True
+            threshold (integer, optional): min value on dispertion ratio to be kept
+                By default 100
+        @Author: Nicolas THAIZE
+        """
+
+        if auto_ordinal_encode:
+            self.set_df(self.ordinal_encoding(self.df))
+
+        am = np.mean(self.df, axis=0)
+        gm = np.power(np.prod(self.df, axis=0), 1 / self.df.shape[0])
+        disp_ratio = am/gm
+        disp_ratio = disp_ratio[disp_ratio >= threshold].sort_values(ascending=False)
+
+        self.set_df(self.df.loc[: , disp_ratio.index])        
+
 
 if __name__ == "__main__":
+    df = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=50)
+    feature_selection = FeatureSelection(df)
+    feature_selection.plot_dispertion_ratio()
+    feature_selection.drop_columns_by_dispertion_ratio_value()
 
     # Unit testing FeatureSelection 
     class TestFeatureSelection(unittest.TestCase):
@@ -75,4 +137,4 @@ if __name__ == "__main__":
 
             self.assertTrue(assert_val, "Cols are not included")
     
-    unittest.main()
+    #unittest.main()
