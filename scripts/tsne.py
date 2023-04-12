@@ -116,7 +116,7 @@ def get_kl_divergence_score(tsne):
 
 
 if __name__ == "__main__":
-    data = get_data(file_path = "./data/en.openfoodfacts.org.products.csv", nrows=1000)
+    data = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=1000)
     
     #Data preparation
     tsne_df = get_num_feats(data)
@@ -130,10 +130,10 @@ if __name__ == "__main__":
 
 
     ## Basic tsne
-    #tsne = fit_tsne(tsne_df)
-    #result = transform_tnse(tsne=tsne, df=tsne_df)
-    #plot_tsne(result, kmeans_result)
-    #print("Kullback-Leibler divergence score : " + str(get_kl_divergence_score(tsne)))
+    tsne = fit_tsne(tsne_df)
+    result = transform_tnse(tsne=tsne, df=tsne_df)
+    plot_tsne(result, kmeans_result)
+    print("Kullback-Leibler divergence score : " + str(get_kl_divergence_score(tsne)))
 
     # Plotting multiple tsne based on perplexity hyperparameter
     plot_tsne_perplexity([10, 50, 100], tsne_df, kmeans_result)
