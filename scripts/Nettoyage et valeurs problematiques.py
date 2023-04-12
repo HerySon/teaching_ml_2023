@@ -1,59 +1,64 @@
-###########################################################
-# Nettoyage du jeu de données des valeurs problématiques  #
-###########################################################
-# Importation des bibliotéques
-import numpy as np # linear algebra
-import pandas as pd # data processing
-import matplotlib.pyplot as plt
-import seaborn as sns
-#Importationde 17000 premiere lignes de la base de données, soit 10%
-datas = pd.read_csv(r"D:\Bibliothèques\Documents\M1 data Ynov\Maj 3 Machine Learning\OpenFoodFact\data\en.openfoodfacts.org.products.csv", nrows = 1700, sep='\t', encoding='utf-8')
-# Infos sur la dataset
-datas.info()
-#Fonction pour afficher les nombres de valeurs null
-def null_factor(df, tx_threshold=50):
-    # df: notre dataframe de départ
-    # tx_threshold : Le seuil de nullité qui est fixé par défaut à 50% et au dessus duquel la vraibale sera supprimée
-  null_rate = ((datas.isnull().sum() / datas.shape[0])*100).sort_values(ascending=False).reset_index()
-  null_rate.columns = ['Variable','Taux_de_Null']
-  high_null_rate = null_rate[null_rate.Taux_de_Null >= tx_threshold]
-  return high_null_rate
-#test pour savoir les variables avec 100% de valeurs null
-full_null_rate = null_factor(datas, 100)
-full_null_rate
-#Nous allons regarder le taux de remplissage des variables graphiquement et fixer un seuil de suppression à 25% de taux de remplissage
-filling_features = null_factor(datas, 0)
-filling_features["Taux_de_Null"] = 100-filling_features["Taux_de_Null"]
-filling_features = filling_features.sort_values("Taux_de_Null", ascending=False) 
+import pandas as pd
+import numpy as np
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder
 
-#Seuil de suppression
-sup_threshold = 25
+def clean_dataset(df):
+    # Drop any columns with more than 50% missing values
+    df.dropna(thresh=df.shape[0]*0.5, axis=1, inplace=True)
 
-fig = plt.figure(figsize=(20, 35))
+    # Remove any leading or trailing spaces from column names
+    df.columns = df.columns.str.strip()
 
-font_title = {'family': 'serif',
-              'color':  '#114b98',
-              'weight': 'bold',
-              'size': 18,
-             }
+    # Convert all string columns to lowercase
+    string_cols = df.select_dtypes(include='object').columns
+    df[string_cols] = df[string_cols].apply(lambda x: x.str.lower())
 
-sns.barplot(x="Taux_de_Null", y="Variable", data=filling_features, palette="flare")
-#Seuil pour suppression des varaibles
-plt.axvline(x=sup_threshold, linewidth=2, color = 'r')
-plt.text(sup_threshold+2, 65, 'Seuil de suppression des variables', fontsize = 16, color = 'r')
+    # Remove any duplicate rows
+    df.drop_duplicates(inplace=True)
 
-plt.title("Taux de remplissage des variables dans le jeu de données (%)", fontdict=font_title)
-plt.xlabel("Taux de remplissage (%)")
-plt.show()
-#Liste des variables à conserver
-features_to_conserve = list(filling_features.loc[filling_features['Taux_de_Null']>=sup_threshold, 'Variable'].values)
-#Liste des variables supprimées
-deleted_features = list(filling_features.loc[filling_features['Taux_de_Null']<sup_threshold, 'Variable'].values)
+    # Convert any date columns to datetime format
+    date_cols = df.select_dtypes(include='datetime').columns
+    df[date_cols] = df[date_cols].apply(pd.to_datetime)
 
-#Nouveau Dataset avec les variables conservées
-datas = datas[features_to_conserve].sort_values(["created_datetime","last_modified_datetime"], ascending=True)
-datas.sample(5)
-#Fonction pour conserver les varibales suffixées avec _100g 
+    # Remove any non-numeric characters from numeric columns
+    numeric_cols = df.select_dtypes(include='number').columns
+    df[numeric_cols] = df[numeric_cols].apply(lambda x: pd.to_numeric(x.astype(str).str.replace('[^0-9\.]+', ''), errors='coerce'))
+
+    # Fill missing values with the mean or median of the column
+    numeric_imputer = SimpleImputer(strategy='median')
+    categorical_imputer = SimpleImputer(strategy='most_frequent')
+
+    for col in df.columns:
+        if df[col].dtype == 'object':
+            df[col] = categorical_imputer.fit_transform(df[[col]])
+        else:
+            df[col] = numeric_imputer.fit_transform(df[[col]])
+
+    # Remove any outliers in numeric columns using the IQR method
+    Q1 = df[numeric_cols].quantile(0.25)
+    Q3 = df[numeric_cols].quantile(0.75)
+    IQR = Q3 - Q1
+    df = df[~((df[numeric_cols] < (Q1 - 1.5 * IQR)) | (df[numeric_cols] > (Q3 + 1.5 * IQR))).any(axis=1)]
+
+    # Standardize the numeric columns using the standard scaler
+    scaler = StandardScaler()
+    df[numeric_cols] = scaler.fit_transform(df[numeric_cols])
+
+    # Encode any categorical columns using label encoding or one-hot encoding
+    categorical_cols = df.select_dtypes(include=['object', 'category']).columns
+    for col in categorical_cols:
+        if len(df[col].unique()) == 2:
+            encoder = LabelEncoder()
+            df[col] = encoder.fit_transform(df[col])
+        else:
+            encoder = OneHotEncoder(handle_unknown='ignore')
+            encoded_cols = pd.DataFrame(encoder.fit_transform(df[[col]]).toarray(), columns=[f'{col}_{category}' for category in encoder.categories_[0]])
+            df = pd.concat([df, encoded_cols], axis=1)
+            df.drop(col, axis=1, inplace=True)
+
+    return df
+#keep variable with suffixe _100g 
 def search_componant(df, suffix='_100g'):
     #df: dataframe de départ
     # Suffixe de la variable
@@ -62,25 +67,12 @@ def search_componant(df, suffix='_100g'):
       if '_100g' in col: componant.append(col)
   df_subset_columns = df[componant]
   return df_subset_columns
-#Affichage
-df_subset_nutients = search_componant(datas,'_100g')
-df_subset_nutients.head()
-datas = datas[df_subset_nutients.notnull().any(axis=1)]
-datas.shape
-# Suppression des doublons en fonction du code
-datas.drop_duplicates(subset ="code", keep = 'last', inplace=True)
-datas[(datas["product_name"].isnull()==False) 
-      & (datas["brands"].isnull()==False)].groupby(by=["product_name","brands"])["code"].nunique().sort_values(ascending=False)
-# Suppression des doublons sur marque et produit en conservant les valeurs nulles
-datas = datas[(~datas.duplicated(["product_name","brands"],keep="last")) 
-      | ((datas['product_name'].isnull()) & (datas['brands'].isnull()))]
-datas.shape
 #Suppresion des variables redondantes par exemple le cas des variables suffixées par _tags ou _en qui ne font que reprendre d'autres features traduites ou simplifiées.
-#Exemple :
-category_columns = ['categories','categories_tags','categories_en']
-datas[datas[category_columns].notnull().any(axis=1)][['product_name'] + category_columns].sample(5)
+
 def search_redundant_col(df):
+  category_columns = ['categories','categories_tags','categories_en']
   redundant_columns = []
+  df[df[category_columns].notnull().any(axis=1)][['product_name'] + category_columns].sample(5)
   for col in df.columns:
     if "_en" in col:
       en = col.replace('_en','')
@@ -99,47 +91,29 @@ def search_redundant_col(df):
         redundant_columns.append(col)
 
   return redundant_columns
-#Suppression
-datas.drop(search_redundant_col(datas), axis=1, inplace=True)
+df.drop(search_redundant_col(df), axis=1, inplace=True)
+#Autres opérations spécifiques
 #Les dates également comportent une certaine redondance. Entre les timestamp et les dates au format "yyyy-mm-dd", il est nécessaire d'en éliminer :
-datas['created_datetime'] = pd.to_datetime(datas['created_t'], unit='s')
-datas['last_modified_datetime'] = pd.to_datetime(datas['last_modified_t'], unit='s')
-datas = datas.drop(['created_t','last_modified_t'], axis=1)
-datas.head()
+df['created_datetime'] = pd.to_datetime(df['created_t'], unit='s')
+df['last_modified_datetime'] = pd.to_datetime(df['last_modified_t'], unit='s')
+df = df.drop(['created_t','last_modified_t'], axis=1)
+df.head()
 #Suppression tous les produits qui n'ont ni nom, ni catégorie 
-datas_cleaned = datas[~((datas.product_name.isnull()) 
-                        & ((datas.pnns_groups_1 == "unknown") 
-                           | (datas.main_category_en == "unknown")))]
+df_cleaned = df[~((df.product_name.isnull()) 
+                        & ((df.pnns_groups_1 == "unknown") 
+                           | (df.main_category_en == "unknown")))]
 #On supprime les lignes dont toutes les numerical_features sont à 0 ou nulles
-datas_cleaned = datas_cleaned.loc[~((datas_cleaned[numerical_features]==0) | (datas_cleaned[numerical_features].isnull())).all(axis=1)]
+df_cleaned = df_cleaned.loc[~((df_cleaned[numerical_features]==0) | (df_cleaned[numerical_features].isnull())).all(axis=1)]
 #On supprime les lignes contenant des valeurs négatives et des max aberrants
-datas_cleaned = datas_cleaned[~(datas_cleaned[numerical_features] < 0).any(axis=1)]
-datas_cleaned = datas_cleaned[~(datas_cleaned[numerical_features].isin([999999,9999999])).any(axis=1)]
+df_cleaned = df_cleaned[~(df_cleaned[numerical_features] < 0).any(axis=1)]
+df_cleaned = df_cleaned[~(df_cleaned[numerical_features].isin([999999,9999999])).any(axis=1)]
 # supprimer les lignes dont au moins 1 des variables de nutriments est supérieur au seuil pour les variabes _100g
 g_per_100g_features = ['proteins_100g','fat_100g','carbohydrates_100g','sugars_100g','salt_100g',
                        'sodium_100g','saturated-fat_100g','fiber_100g']
-datas_cleaned = datas_cleaned[~(datas_cleaned[g_per_100g_features] > 100).any(axis=1)]
+df_cleaned = df_cleaned[~(df_cleaned[g_per_100g_features] > 100).any(axis=1)]
 #saturated-fat_100g < fat_100g, de même sodium_100g < salt_100g.On supprime les lignes qui ne remplissement pas es conditions
-datas_cleaned = datas_cleaned[~((datas_cleaned['saturated-fat_100g'] > datas_cleaned['fat_100g']) 
-                                | (datas_cleaned['sodium_100g'] > datas_cleaned['salt_100g']))]
+df_cleaned = df_cleaned[~((df_cleaned['saturated-fat_100g'] > df_cleaned['fat_100g']) 
+                                | (df_cleaned['sodium_100g'] > df_cleaned['salt_100g']))]
 #Nous allons donc supprimer toutes les lignes dont la variable energy_100g est supérieur à 3700 (ou 900 kcal/100g).
-datas_cleaned = datas_cleaned[~((datas_cleaned['energy_100g'] > 3700) 
-                                | (datas_cleaned['energy-kcal_100g'] > 900))]
-#la médiane et l'écart-type pour éliminer les outliers
-#On initialise l'écart-type et la médiane
-sigma_features = ['additives_n','serving_quantity']
-sigma = [0 for _ in range(len(sigma_features))]
-median = [0 for _ in range(len(sigma_features))]
-#Puis on complètes les valeurs avec le dataset sans les valeurs nulles
-for i in range(len(sigma_features)):
-  median[i] = datas_cleaned[pd.notnull(datas_cleaned[sigma_features[i]])][sigma_features[i]].median()
-  serie = datas_cleaned[pd.notnull(datas_cleaned[sigma_features[i]])][sigma_features[i]]
-  serie = serie.sort_values()
-  sigma[i] = np.std(serie[:-25])
-#
-for i in range(len(sigma_features)):
-    col = sigma_features[i]
-    threshold = (median[i] + 5*sigma[i])
-    print('{:30}: suppression de la ligne si valeur > {}'.format(col, round(threshold,3)))
-    mask = datas_cleaned[col] > threshold
-    datas_cleaned = datas_cleaned.drop(datas_cleaned[mask].index)
+df_cleaned = df_cleaned[~((df_cleaned['energy_100g'] > 3700) 
+                                | (df_cleaned['energy-kcal_100g'] > 900))]
