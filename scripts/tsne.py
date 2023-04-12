@@ -4,7 +4,14 @@ from data_loader import get_data
 from sklearn.cluster import KMeans
 from utils import drop_cols_fullna, std_scale_df, get_num_feats
 
-def fit_tsne(df, perplexity=50, init='pca', n_components=2, learning_rate='auto', n_iter=1000, n_jobs=-1, **kwargs):
+def fit_tsne(df, 
+             perplexity=50, 
+             init='pca', 
+             n_components=2, 
+             learning_rate='auto', 
+             n_iter=1000, 
+             n_jobs=-1,
+             **kwargs):
     """Output tnse fitted model with provided hyperparameters and df
     Args:
         df (DataFrame): pandas dataframe
@@ -79,7 +86,12 @@ def plot_tsne(tsne_matrix, clusters_array, cmap=plt.get_cmap('tab20c')):
     plt.plot()
     plt.show()
 
-def fit_multiple_perplexity(perplexities, df, init='pca', n_components=2, learning_rate='auto', n_iter=1000):
+def fit_multiple_perplexity(perplexities, 
+                            df, 
+                            init='pca', 
+                            n_components=2, 
+                            learning_rate='auto', 
+                            n_iter=1000):
     """Output an array of tnse fitted models with provided perplexities values
     Args:
         perplexities (array integer): array of perplexity values to use to fit tsne models
@@ -96,7 +108,13 @@ def fit_multiple_perplexity(perplexities, df, init='pca', n_components=2, learni
     tsne_perplexity = perplexities
     results = {}
     for perplexity in tsne_perplexity:
-        results[perplexity] = fit_tsne(df, n_components=n_components, perplexity=perplexity, init=init, learning_rate=learning_rate, n_iter=n_iter)
+        results[perplexity] = fit_tsne(
+            df, 
+            n_components=n_components, 
+            perplexity=perplexity, 
+            init=init, 
+            learning_rate=learning_rate, 
+            n_iter=n_iter)
     return results
 
 def transform_multiple_tsne(tsnes, df):
@@ -113,7 +131,11 @@ def transform_multiple_tsne(tsnes, df):
         results[key] = transform_tnse(tsne, df)
     return results
 
-def plot_tsne_perplexity(perplexities, df, clusters_array, cmap=plt.get_cmap('tab20c'), **kwargs):
+def plot_tsne_perplexity(perplexities, 
+                         df, 
+                         clusters_array, 
+                         cmap=plt.get_cmap('tab20c'), 
+                         **kwargs):
     """Plot tsne using multiple perplexities
     Args:
         perplexities (array): perplexities to use to plot
@@ -134,7 +156,12 @@ def plot_tsne_perplexity(perplexities, df, clusters_array, cmap=plt.get_cmap('ta
     results = {}
     
     for perplexity in tsne_perplexity:
-        tsnes = fit_multiple_perplexity(tsne_perplexity, df, n_components=n_components, init=init, learning_rate=learning_rate, n_iter=n_iter)
+        tsnes = fit_multiple_perplexity(tsne_perplexity, 
+                                        df, 
+                                        n_components=n_components, 
+                                        init=init, 
+                                        learning_rate=learning_rate, 
+                                        n_iter=n_iter)
         results = transform_multiple_tsne(tsnes, df)
         fig, axs = plt.subplots(len(perplexities), figsize=(30, 30))
 
