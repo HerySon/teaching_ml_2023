@@ -61,7 +61,7 @@ def transform_tnse(tsne, df):
 def plot_tsne(tsne_matrix, clusters_array, cmap=plt.get_cmap('tab20c')):
     """Plot tsne transformed df
     Args:
-        tsne_matrix (ndarray): 2D matrix of transformed values
+        tsne_matrix (ndarray): 2D matrix of transformed values from transform_tsne
         clusters_array (ndarray): 1D matrix of cluster labels for each entries
         cmap (Colormap): colors to use to paint clusters
     Returns:
