@@ -11,26 +11,40 @@ from sklearn.preprocessing import QuantileTransformer
 from sklearn.preprocessing import PowerTransformer
 
 class Scaling:
-
-    d_df             = None
-    d_scaling_method = 'standard'
+    """Class to scaling pandas dataframe
+    Args:
+        df (DataFrame): pandas dataframe
+        scaling_method (string): method to scale pandas dataframe
+    Returns:
+        df (DataFrame): return scaled pandas dataframe
+    @Author: Thomas PAYAN
+    """
 
     def __init__(
                     self,
-                    df             = d_df,
-                    scaling_method = d_scaling_method
+                    df             = None,
+                    scaling_method = 'standard'
                 ):
 
-        # Init attributes
         self.df             = df
         self.scaling_method = scaling_method
 
-    # Function to convert numpy array to pandas Dataframe
-    def convert_numpy_to_pandas(self, df):
-        return pd.DataFrame(df)
+    def convert_numpy_to_pandas(self, np_array):
+        """Convert numpy array to pandas Dataframe
+        Args:
+            np_array (array) : numpy array
+        Returns:
+            df (DataFrame): return pandas dataframe
+        @Author: Thomas PAYAN
+        """
+        return pd.DataFrame(np_array)
 
-    # Function to convert categorical features to numeric
     def convert_categorical_features_to_numeric(self):
+        """Convert categorical features to numeric
+        Returns:
+            df (DataFrame): return dataframe with categorical features converted
+        @Author: Thomas PAYAN
+        """
         print("\nPerforming categorical features convertion")
 
         df_cat = self.df.select_dtypes(include=["object"])
@@ -39,57 +53,99 @@ class Scaling:
             self.df[col] = self.df[col].astype('category')
             self.df[col] = self.df[col].cat.codes
 
-    # Function to Standard scaling
+        return self.df
+
     def standard_scaler(self):
+        """Scale dataframe features with StandardScaler transformation
+        Returns:
+            scaled_df (DataFrame): return new scaled dataframe
+        @Author: Thomas PAYAN
+        """
         print("\nStandard scaling")
         scaled_df = StandardScaler().fit_transform(self.df)
         scaled_df = self.convert_numpy_to_pandas(scaled_df)
         return scaled_df
     
-    # Function to Min-max scaling
     def min_max_scaler(self):
+        """Scale dataframe features with MinMaxScaler transformation
+        Returns:
+            scaled_df (DataFrame): return new scaled dataframe
+        @Author: Thomas PAYAN
+        """
         print("\nMin-max scaling")
         scaled_df = MinMaxScaler().fit_transform(self.df)
         scaled_df = self.convert_numpy_to_pandas(scaled_df)
         return scaled_df
     
-    # Function to Max-abs scaling
     def max_abs_scaler(self):
+        """Scale dataframe features with MaxAbsScaler transformation
+        Returns:
+            scaled_df (DataFrame): return new scaled dataframe
+        @Author: Thomas PAYAN
+        """
         print("\nMax-abs scaling")
         scaled_df = MaxAbsScaler().fit_transform(self.df)
         scaled_df = self.convert_numpy_to_pandas(scaled_df)
         return scaled_df
     
-    # Function to Robust scaling
-    def robust_scaler(self, v_quantile_start=25, v_quantile_end=75):
+    def robust_scaler(self, quantile_start=25, quantile_end=75):
+        """Scale dataframe features with RobustScaler transformation
+        Args:
+            quantile_start (integer) : start quantile range
+            quantile_end (integer) : end quantile range
+        Returns:
+            scaled_df (DataFrame): return new scaled dataframe
+        @Author: Thomas PAYAN
+        """
         print("\nRobust scaling")
-        scaled_df = RobustScaler(quantile_range=(v_quantile_start, v_quantile_end)).fit_transform(self.df)
+        scaled_df = RobustScaler(quantile_range=(quantile_start, quantile_end)).fit_transform(self.df)
         scaled_df = self.convert_numpy_to_pandas(scaled_df)
         return scaled_df
     
-    # Function to Power transformation
-    def power_transformation(self, v_method='yeo-johnson'): # box-cox
-        print("\nPower transformation ("+v_method+")")
-        scaled_df = PowerTransformer(method=v_method).fit_transform(self.df)
+    def power_transformation(self, method='yeo-johnson'):
+        """Scale dataframe features with Power transformation
+        Args:
+            method (tuple : {'yeo-johnson', 'box-cox'}) : power transform method
+        Returns:
+            scaled_df (DataFrame): return new scaled dataframe
+        @Author: Thomas PAYAN
+        """
+        print("\nPower transformation ("+method+")")
+        scaled_df = PowerTransformer(method=method).fit_transform(self.df)
         scaled_df = self.convert_numpy_to_pandas(scaled_df)
         return scaled_df
     
-    # Function to Quantile transformation
-    def quantile_transformation(self, v_output_distribution='uniform'): # normal
-        print("\nQuantile transformation ("+v_output_distribution+")")
-        scaled_df = QuantileTransformer(output_distribution=v_output_distribution).fit_transform(self.df)
+    def quantile_transformation(self, n_quantiles=200, output_distribution='uniform'):
+        """Scale dataframe features with Quantile transformation
+        Args:
+            n_quantiles (integer) : number of quantiles to be computed
+            output_distribution (tuple : {'uniform', 'normal'}) : marginal distribution for the transformed data
+        Returns:
+            scaled_df (DataFrame): return new scaled dataframe
+        @Author: Thomas PAYAN
+        """
+        print("\nQuantile transformation ("+output_distribution+")")
+        scaled_df = QuantileTransformer(n_quantiles=n_quantiles, output_distribution=output_distribution).fit_transform(self.df)
         scaled_df = self.convert_numpy_to_pandas(scaled_df)
         return scaled_df
     
-    # Function to Normalize transformation
     def normalize_transformation(self):
+        """Scale dataframe features with Normalizer transformation
+        Returns:
+            scaled_df (DataFrame): return new scaled dataframe
+        @Author: Thomas PAYAN
+        """
         print("\nNormalize transformation")
         scaled_df = Normalizer().fit_transform(self.df)
         scaled_df = self.convert_numpy_to_pandas(scaled_df)
         return scaled_df
 
-    # Function to scale features
     def scaling_features(self):
+        """Scale dataframe features
+        Returns:
+            df (DataFrame): return scaled dataframe features
+        @Author: Thomas PAYAN
+        """
         print("\nPerforming features scaling")
 
         match self.scaling_method:
@@ -108,11 +164,14 @@ class Scaling:
             case 'normalize':
                 self.df = self.normalize_transformation()
             case _:
-                self.df = self.standard_scaler()
+                print("\nWarning : select another method !")
 
-    # Function to scale Dataframe features
     def scaling(self):
-        
+        """Scale dataframe
+        Returns:
+            df (DataFrame): return scaled dataframe
+        @Author: Thomas PAYAN
+        """
         self.convert_categorical_features_to_numeric()
 
         self.scaling_features()
