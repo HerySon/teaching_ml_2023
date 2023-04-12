@@ -159,6 +159,7 @@ def plot_tsne_perplexity(perplexities,
     
     tsne_perplexity = perplexities
     results = {}
+    fig, axs = plt.subplots(len(perplexities), figsize=(30, 30))
     
     for perplexity in tsne_perplexity:
         tsnes = fit_multiple_perplexity(tsne_perplexity, 
@@ -168,7 +169,6 @@ def plot_tsne_perplexity(perplexities,
                                         learning_rate=learning_rate, 
                                         n_iter=n_iter)
         results = transform_multiple_tsne(tsnes, df)
-        fig, axs = plt.subplots(len(perplexities), figsize=(30, 30))
 
         for index, perplexity in enumerate(results):
             currentAxis = axs[index]
@@ -179,10 +179,10 @@ def plot_tsne_perplexity(perplexities,
                     currentAxis.scatter(X_tsne[i][0], X_tsne[i][1], marker='.', color=cval)
                 else:
                     currentAxis.scatter(X_tsne[i][0], X_tsne[i][1], marker='.', color=cval)
-                ax_title = 'Représentation en 2D du dataset avec cluster perplexity = ' + str(perplexity)
-                currentAxis.set_title(ax_title)
-                currentAxis.set_xlabel('premier t-SNE')
-                currentAxis.set_ylabel('deuxieme t-SNE')
+            ax_title = 'Représentation en 2D du dataset avec cluster perplexity = ' + str(perplexity)
+            currentAxis.set_title(ax_title)
+            currentAxis.set_xlabel('premier t-SNE')
+            currentAxis.set_ylabel('deuxieme t-SNE')
     plt.plot()
     plt.show()
 
