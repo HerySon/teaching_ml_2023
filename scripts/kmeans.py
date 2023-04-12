@@ -66,8 +66,8 @@ def kmeans(dataset, k_min=2, k_max=10, elbow_choice='inertias', inp_algo='lloyd'
         choice = distortions
     plt.plot(K, choice, 'bx-')
     plt.xlabel('Values of K')
-    plt.ylabel('Inertia')
-    plt.title('The Elbow Method using Inertia')
+    plt.ylabel(f'{elbow_choice')
+    plt.title(f'The Elbow Method using {elbow_choice}')
     plt.show()
     
     k = input("Now choose a value for k :")
