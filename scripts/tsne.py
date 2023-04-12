@@ -65,19 +65,23 @@ def transform_tnse(tsne, df):
     """
     return tsne.fit_transform(df)
 
-def plot_tsne(tsne_matrix, clusters_array, cmap=plt.get_cmap('tab20c')):
+def plot_tsne(tsne_matrix, clusters_array=None, cmap=plt.get_cmap('tab20c')):
     """Plot tsne transformed df
     Args:
         tsne_matrix (ndarray): 2D matrix of transformed values from transform_tsne
-        clusters_array (ndarray): 1D matrix of cluster labels for each entries
+        clusters_array (ndarray, optional): 1D matrix of cluster labels for each entries
+            By default None
         cmap (Colormap): colors to use to paint clusters
     Returns:
     @Author: Nicolas THAIZE
     """
     fig, ax = plt.subplots(figsize=(10, 10))
     for i in range(tsne_matrix.shape[0]):
-        cval = cmap(clusters_array[i])
-        ax.scatter(tsne_matrix[i][0], tsne_matrix[i][1], marker='.', color=cval)
+        if (clusters_array is not None):
+            cval = cmap(clusters_array[i])
+            ax.scatter(tsne_matrix[i][0], tsne_matrix[i][1], marker='.', color=cval)
+        else:
+            ax.scatter(tsne_matrix[i][0], tsne_matrix[i][1], marker='.')
         ax_title = 'Représentation en 2D du dataset avec clustering'
         ax.set_title(ax_title)
         ax.set_xlabel('premier t-SNE')
@@ -133,14 +137,15 @@ def transform_multiple_tsne(tsnes, df):
 
 def plot_tsne_perplexity(perplexities, 
                          df, 
-                         clusters_array, 
+                         clusters_array=None, 
                          cmap=plt.get_cmap('tab20c'), 
                          **kwargs):
     """Plot tsne using multiple perplexities
     Args:
         perplexities (array): perplexities to use to plot
         df (DataFrame): pandas dataframe
-        clusters_array (ndarray): 1D matrix of cluster labels for each entries
+        clusters_array (ndarray, optional): 1D matrix of cluster labels for each entries
+            By default None
         cmap (Colormap): colors to use to paint clusters
         kwargs (): Hyperparameters of tsne
     Returns:
@@ -169,8 +174,11 @@ def plot_tsne_perplexity(perplexities,
             currentAxis = axs[index]
             X_tsne = results[perplexity]
             for i in range(X_tsne.shape[0]):
-                cval = cmap(clusters_array[i])
-                currentAxis.scatter(X_tsne[i][0], X_tsne[i][1], marker='.', color=cval)
+                if(clusters_array is not None):
+                    cval = cmap(clusters_array[i])
+                    currentAxis.scatter(X_tsne[i][0], X_tsne[i][1], marker='.', color=cval)
+                else:
+                    currentAxis.scatter(X_tsne[i][0], X_tsne[i][1], marker='.', color=cval)
                 ax_title = 'Représentation en 2D du dataset avec cluster perplexity = ' + str(perplexity)
                 currentAxis.set_title(ax_title)
                 currentAxis.set_xlabel('premier t-SNE')
@@ -205,10 +213,10 @@ if __name__ == "__main__":
 
 
     ## Basic tsne
-    tsne = fit_tsne(tsne_df)
-    result = transform_tnse(tsne=tsne, df=tsne_df)
-    plot_tsne(result, kmeans_result)
-    print("Kullback-Leibler divergence score : " + str(get_kl_divergence_score(tsne)))
+    #tsne = fit_tsne(tsne_df)
+    #result = transform_tnse(tsne=tsne, df=tsne_df)
+    #plot_tsne(result, kmeans_result)
+    #print("Kullback-Leibler divergence score : " + str(get_kl_divergence_score(tsne)))
 
-    # Plotting multiple tsne based on perplexity hyperparameter
+    ## Plotting multiple tsne based on perplexity hyperparameter
     plot_tsne_perplexity([10, 50, 100], tsne_df, kmeans_result)
