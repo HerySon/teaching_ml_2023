@@ -48,8 +48,7 @@ def scale_transform_df(df, scaler):
         dataframe: output scaled dataframe
     @Author: Nicolas THAIZE
     """
-    df = df.select_dtypes([np.number])
-    df_cols = df.columns
+    df_cols = df.select_dtypes([np.number]).columns
     df[df_cols] = scaler.transform(df[df_cols])
     return df
 
