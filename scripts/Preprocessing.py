@@ -2,47 +2,67 @@ from data_loader import *
 import pandas as pd
 
 class Preprocessing:
-
-    d_df        = None
-    d_percent   = 70
-    d_num_imput = 'mean'
-    d_cat_imput = 'mode'
+    """Class to preprocessing pandas dataframe
+    Args:
+        df (DataFrame): pandas dataframe
+        percent (integer): percent of missing data
+        num_imput (string): method to impute numerical features missing values
+        cat_imput (string): method to impute categorical features missing values
+    Returns:
+        df (DataFrame): return preprocessed pandas dataframe
+    @Author: Thomas PAYAN
+    """
 
     def __init__(
                     self,
-                    df        = d_df,
-                    percent   = d_percent,
-                    num_imput = d_num_imput,
-                    cat_imput = d_cat_imput
+                    df        = None,
+                    percent   = 70,
+                    num_imput = 'mean',
+                    cat_imput = 'mode'
                 ):
 
-        # Init attributes
         self.df        = df
         self.percent   = percent
         self.num_imput = num_imput
         self.cat_imput = cat_imput
         
-    # Functions to count duplicated values
     def count_duplicated_values(self):
+        """Count duplicated values for each feature
+        Returns:
+            df (DataFrame): return sum of duplicated values
+        @Author: Thomas PAYAN
+        """
         return self.df.duplicated().sum()
 
-    # Function to drop duplicated values
     def drop_duplicated_values(self):
+        """Drop duplicated values
+        Returns:
+            df (DataFrame): return dataframe without duplicated values
+        @Author: Thomas PAYAN
+        """
         print("\nRows number before drop duplicated values : %s" % len(self.df))
         if(self.count_duplicated_values() > 0):
             self.df.drop_duplicates(inplace=True)
         print("\nRows number after drop duplicated values : %s" % len(self.df))
+        return self.df
 
     # Functions to display missing values
     def display_missing_values(self): 
+        """Display missing values
+        @Author: Thomas PAYAN
+        """
         for col in self.df.columns.tolist():          
             print("{} column missing values : {}".format(col, self.df[col].isnull().sum()))
 
-    # Function to drop missing values
     def drop_missing_values(self):
+        """Drop missing values
+        Returns:
+            df (DataFrame): return dataframe without missing values
+        @Author: Thomas PAYAN
+        """
         self.display_missing_values()
 
-        calc_null = [(c, self.df[c].isna().mean()*100) for c in self.df]
+        calc_null = [(col, self.df[col].isna().mean()*100) for col in self.df]
         calc_null = pd.DataFrame(calc_null, columns=["Feature", "Percent NULL"])
         print(calc_null.sort_values("Percent NULL", ascending=False))
 
@@ -54,12 +74,17 @@ class Preprocessing:
         print("\nNumber features before droping when %s percent of values are NULL : %s" % (self.percent, len(self.df.columns)))
         self.df.drop(list_calc_null, axis=1, inplace=True)
         print("\nNumber features after droping when %s percent of values are NULL : %s" % (self.percent, len(self.df.columns)))
+        return self.df
 
-    # Function to impute numeric features missing values
     def impute_numeric_features(self):
+        """Impute numerical features missing values
+        Returns:
+            df (DataFrame): return dataframe with numerical features imputed
+        @Author: Thomas PAYAN
+        """
         print("\nPerforming numeric features imputation ("+self.num_imput+")")
 
-        df_num = self.df.select_dtypes(exclude=["object"])
+        df_num = self.df.select_dtypes(include=["number"])
 
         match self.num_imput:
             case 'mean':
@@ -72,11 +97,16 @@ class Preprocessing:
                 for col in df_num.columns.tolist():
                     self.df[col].fillna(self.df[col].mode().iloc[0], inplace=True)
             case _:
-                for col in df_num.columns.tolist():
-                    self.df[col].fillna(self.df[col].mean(), inplace=True)
+                print("\nWarning : select another method !")
+
+        return self.df
                    
-    # Function to impute categorical features missing values
     def impute_categorical_features(self):
+        """Impute categorical features missing values
+        Returns:
+            df (DataFrame): return dataframe with categorical features imputed
+        @Author: Thomas PAYAN
+        """
         print("\nPerforming categorical features imputation ("+self.cat_imput+")")
 
         df_cat = self.df.select_dtypes(include=["object"])
@@ -86,17 +116,27 @@ class Preprocessing:
                 for col in df_cat.columns.tolist():
                     self.df[col].fillna(self.df[col].mode().iloc[0], inplace=True)
             case _:
-                for col in df_cat.columns.tolist():
-                    self.df[col].fillna(self.df[col].mode().iloc[0], inplace=True)
+                print("\nWarning : select another method !")
+
+        return self.df
              
-    # Function to impute missing values
     def impute_missing_values(self):
+        """Impute all features missing values
+        Returns:
+            df (DataFrame): return dataframe with all features imputed
+        @Author: Thomas PAYAN
+        """
         self.impute_numeric_features()
         self.impute_categorical_features()
         self.display_missing_values()
+        return self.df
 
-    # Function to convert categorical features to numeric
     def convert_categorical_features_to_numeric(self):
+        """Convert categorical features to numeric
+        Returns:
+            df (DataFrame): return dataframe with categorical features converted
+        @Author: Thomas PAYAN
+        """
         print("\nPerforming categorical features convertion")
 
         df_cat = self.df.select_dtypes(include=["object"])
@@ -105,9 +145,14 @@ class Preprocessing:
             self.df[col] = self.df[col].astype('category')
             self.df[col] = self.df[col].cat.codes
 
-    # Function to preprocess the Dataframe
+        return self.df
+
     def preprocessing(self):
-        
+        """Preprocess dataframe
+        Returns:
+            df (DataFrame): return preprocessed dataframe
+        @Author: Thomas PAYAN
+        """
         self.drop_duplicated_values()
 
         self.drop_missing_values()
