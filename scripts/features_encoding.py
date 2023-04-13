@@ -5,14 +5,14 @@ from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder
 
 def non_numeric_features_encoder(df, columns, encoder_type=OrdinalEncoder, sparse=False):
     """
-    Encode non-numeric features in a pandas dataframe using OrdinalEncoder or
+    Encode non-numeric features in a pandas DataFrame using OrdinalEncoder or
     OneHotEncoder from Scikit-Learn.
 
     Keyword arguments:
     ------------------
         df: pandas.DataFrame
             The input DataFrame.
-        columns : list of str
+        columns: list of str
             The list of column names to encode.
         encoder_type: type, optional (default OrdinalEncoder)
             The method to encode features. Possible values are: 
@@ -54,21 +54,21 @@ def non_numeric_features_encoder(df, columns, encoder_type=OrdinalEncoder, spars
         if encoder_type == OneHotEncoder:
             df.drop(columns, axis=1, inplace=True)
     
-        # return new dataframe with features encoded
+        # return new DataFrame with features encoded
         return df
 
 
 
 def concat_matrix(df, columns, matrix, encoder):
     """
-    Concat dataframe and sparse matrix from non_numeric_features_encoder function,
+    Concat DataFrame and sparse matrix from non_numeric_features_encoder function,
     if encoder_type=OneHotEncoder and sparse=True.
 
     Keyword arguments:
     ------------------
         df: pandas.DataFrame
             The input DataFrame.
-        columns : list of str
+        columns: list of str
             The list of column names to encode.
         matrix: sparse matrix
             The sparse matrix output of non_numeric_features_encoder() function.
@@ -78,7 +78,7 @@ def concat_matrix(df, columns, matrix, encoder):
     Returns:
     --------
         pandas.DataFrame
-            The concatenated pandas dataframe with features encoded.
+            The concatenated pandas DataFrame with features encoded.
 
     Author:
     -------
@@ -91,7 +91,7 @@ def concat_matrix(df, columns, matrix, encoder):
     df[encoder.get_feature_names_out()] = df_matrix
     # drop original features if OneHotEncoder
     df.drop(columns, axis=1, inplace=True)
-    # return new dataframe with features encoded
+    # return new DataFrame with features encoded
     return df
 
 
@@ -108,6 +108,6 @@ if __name__ == "__main__":
     columns = ['brand', 'style']
     # Encode non-numeric features and get sparse matrix
     matrix, encoder = non_numeric_features_encoder(df, columns, encoder_type=OneHotEncoder, sparse=True)
-    # Concat dataframe and sparse matrix
+    # Concat DataFrame and sparse matrix
     df_mat = concat_matrix(df, columns, matrix, encoder)
     print(df_mat)
