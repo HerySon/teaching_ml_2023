@@ -3,24 +3,34 @@ import numpy as np
 
 def split_ean13(df, drop_ean13=False):
     """
-    This function split code column into 3 separate columns if it is digit, its length is 13 and don't start with 200
-    because Open Food Facts assigns a number starting with the 200 reserved prefix for products without a barcode.
-    Code column is barcode of the product (can be EAN-13 or internal codes for some food stores).
-    Position 1 to 3 : country code
-    Position 3 to 7 : manufacturer code
-    Position 8 to 12 : product code
-    Position 13 : check digit that will be removed
-    Parameters:
-        df : pandas dataframe (The input dataframe containing the EAN13 codes in a column named "code")
-        drop_ean13 : bool (Default=False), drop code column if set True
+    This function split code column into 3 separate columns if it is digit, its length is 13
+    and don't start with 200 because Open Food Facts assigns a number starting with the 200
+    reserved prefix for products without a barcode.
+    Code column is barcode of the product (can be EAN-13 or internal codes for some food stores):
+    - Position 1 to 3: country code
+    - Position 3 to 7: manufacturer code
+    - Position 8 to 12: product code
+    - Position 13: check digit that will be removed
+
+    Keyword arguments:
+    ------------------
+        df: pandas.DataFrame
+            The input DataFrame containing the EAN13 codes in a column named 'code'.
+        drop_ean13: bool, optional (default False)
+            Drop code column if set True.
+
     Returns:
-        df : pandas dataframe with the separated EAN13 columns
+    --------
+        pandas.DataFrame
+         The pandas DataFrame with the separated EAN13 columns.
+
     Author:
+    -------
         Joëlle Sabourdy
     """
     # Check if code column exists
     if 'code' not in df.columns:
-        raise ValueError('code column not found in dataframe.')
+        raise ValueError('Code column not found in DataFrame.')
     
     # Create new columns
     df['EAN13_country'] = np.nan
