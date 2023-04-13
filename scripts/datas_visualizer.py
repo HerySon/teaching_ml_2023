@@ -132,7 +132,30 @@ class datas_visualizer():
                 save_path = "../results/plot " + datetime.now().strftime("%d-%m-%Y %H-%M-%S") + ".png"
             fig.write_image(save_path)
         pass
-        
+
+
+    def exploration_plots(self):
+        """Generate the exploration plots (used in the notebook)"""
+        df = pd.read_csv("./data/en.openfoodfacts.org.products.csv", sep="\t", nrows=100000)
+        # fill all the nan values with "unknown"
+        df = df.fillna("unknown")
+        # Create a new column that contains 1 if the product contains additives and 0 if not
+        df["contains_additives"] = df["additives_tags"].map(lambda x: 0 if x == "unknown" else 1)
+        self.datas = df
+        # Plot the datas
+        # Contains_additives vs nutriscore grade
+        self.plot(x="nutriscore_grade", plot_type="hist", title="Présence d'additifs en fonction du nutriscore", 
+            color="contains_additives", additionnal_params={"barmode": "group"}, save=False, show=True,
+            x_label="Nutriscore", y_label="Nombre de produits")
+        # Count of additives vs nutriscore grade
+        self.plot(x="nutriscore_grade", y="additives_n", plot_type="hist", title="Nombre d'additifs en fonction du nutriscore", 
+            color="nutriscore_grade", additionnal_params={"barmode": "group"}, save=False, show=True,
+            x_label="Nutriscore", y_label="Nombre de produits")
+        # Ecoscore vs nutriscore
+        self.plot(x="ecoscore_score", y="nutriscore_score", plot_type="scatter", title="Eco score en fonction du nutriscore", 
+              color="nutriscore_grade", save=False, show=True, x_label="Nutriscore", y_label="Ecoscore")
+
+
 
 if "__main__" == __name__:
     # Exemple
