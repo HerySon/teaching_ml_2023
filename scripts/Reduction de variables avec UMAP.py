@@ -1,3 +1,6 @@
+####################################
+# Reduction de variables par l'UMAP#
+####################################
 # Import library
 import numpy as np
 import pandas as pd
