@@ -42,3 +42,5 @@ pyyaml>=6.0
 # termcolor
 
 wordcloud
+multidict
+Unidecode
