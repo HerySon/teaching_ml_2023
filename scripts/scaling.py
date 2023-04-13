@@ -7,8 +7,7 @@ def scaling_data(df, scaler_name):
    # la fonction permet à l'utilsateur de choisir sa methode ( MinMaxScaler, StandardScaler,StandardScaler) pour faire le scaling du data framme
 
 # scaler_name : la methode à utilisée 
-# ctake only variables we will experiment
- features = ['recuperer les colonnes float ']
+# ctake only variables we will experimen
 df = df[features]
 #split data
 X_train, X_test, y_train, y_test = train_test_split(df[features],test_size=0.3,random_state=0)
