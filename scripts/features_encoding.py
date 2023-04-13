@@ -5,19 +5,33 @@ from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder
 
 def non_numeric_features_encoder(df, columns, encoder_type=OrdinalEncoder, sparse=False):
     """
-    Encode non-numeric features in a pandas dataframe using OrdinalEncoder or OneHotEncoder from Scikit-Learn.   
-    Args:
-        df : pandas dataframe (The input dataframe)
-        columns : list of str (The list of column names to encode)
-        encoder_type : OrdinalEncoder or OneHotEncoder (Default='OrdinalEncoder')
-            'OrdinalEncoder' : The features are converted to ordinal integers. This results in a single column of integers (0 to n_categories - 1) per feature.
-            'OneHotEncoder' : This creates a binary column for each category and returns a sparse matrix or dense array (depending on the sparse_output parameter).
-                sparse : bool (Default=False)
-                    Will return sparse matrix if set True else will return an array.
+    Encode non-numeric features in a pandas dataframe using OrdinalEncoder or
+    OneHotEncoder from Scikit-Learn.
+
+    Keyword arguments:
+    ------------------
+        df: pandas.DataFrame
+            The input DataFrame.
+        columns : list of str
+            The list of column names to encode.
+        encoder_type: type, optional (default OrdinalEncoder)
+            The method to encode features. Possible values are: 
+            - OrdinalEncoder: The features are converted to ordinal integers. This
+            results in a single column of integers (0 to n_categories - 1) per feature.
+            - OneHotEncoder: This creates a binary column for each category and returns
+            a sparse matrix or dense array (depending on the sparse_output parameter).
+        sparse: bool, optional (default False)
+            Will return sparse matrix if set True else will return an array.
+
     Returns:
-        df : the encoded dataframe
-        or sparse matrix and encoder if encoder_type=OneHotEncoder and sparse=True
+    --------
+        pandas.DataFrame
+            The encoded pandas DataFrame if sparse=False.
+        sparse matrix and encoder 
+            If encoder_type=OneHotEncoder and sparse=True.
+
     Author:
+    -------
         Joëlle Sabourdy
     """
     # create a OrdinalEncoder/OneHotEncoder object
@@ -47,14 +61,28 @@ def non_numeric_features_encoder(df, columns, encoder_type=OrdinalEncoder, spars
 
 def concat_matrix(df, columns, matrix, encoder):
     """
-    Concat dataframe and sparse matrix from non_numeric_features_encoder function, if encoder_type == OneHotEncoder and sparse == True.
-    Args :
-        df : pandas dataframe (The input dataframe)
-        columns : list of str (The list of encoded column names)
-        matrix : sparse matrix
-        encoder : encoder object from non_numeric_features_encoder() function
+    Concat dataframe and sparse matrix from non_numeric_features_encoder function,
+    if encoder_type=OneHotEncoder and sparse=True.
+
+    Keyword arguments:
+    ------------------
+        df: pandas.DataFrame
+            The input DataFrame.
+        columns : list of str
+            The list of column names to encode.
+        matrix: sparse matrix
+            The sparse matrix output of non_numeric_features_encoder() function.
+        encoder: encoder object
+            The encoder object from non_numeric_features_encoder() function.
+
     Returns:
-        df : concatenation dataframe and sparce matrix output of OneHotEncoder
+    --------
+        pandas.DataFrame
+            The concatenated pandas dataframe with features encoded.
+
+    Author:
+    -------
+        Joëlle Sabourdy
     """
     import scipy.sparse
     # matrix to pd
