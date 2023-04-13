@@ -3,33 +3,35 @@ import pandas as pd
 import numpy as np
 #Viz
 import matplotlib.pyplot as plt
+#Chi2 test
+from  scipy.stats import chi2_contingency  
+from scipy.stats import chi2
 
 
-
-def cross_table (df,columns) : 
+def cross_table (df,index,columns) : 
     """
     Explore variance of the categorial features in a pandas dataframe using pandas.
     Args:
         df : pandas dataframe
+        index : str (column names to plot)
         columns : list of str (The list of column names to plot)
 
     Returns : 
         Cross table
     """
-    #Select features
-    cat_val = df.select_dtypes(include=['object'])
     #Cross tables
-    data_crosstab = pd.crosstab(cat_val,
+    data_crosstab = pd.crosstab(df.index, df.columns.,
                             margins = False)
     return print(data_crosstab)
 
 
-def chi_2 (df,columns):
+def chi_2 (df,columns,alpha):
     """
-    Explore variance of two categorial features in a pandas dataframe using pandas.
+    Explore independance of two categorial features in a pandas dataframe using pandas.
     Args:
         df : pandas dataframe
         columns : list of str (The list of column names to plot)
+        alpha : 
 
     Returns : 
         Result of chi2
@@ -37,12 +39,8 @@ def chi_2 (df,columns):
     #Select categorial values
     cat_val = df.select_dtypes(include=['object'])
     #Clear values
-    observation = cat_val[['creator','packaging']].value_counts().dropna()
-    #import package
-    from  scipy.stats import chi2_contingency  
-    from scipy.stats import chi2
+    observation = cat_val[[columns]].value_counts().dropna()
     #Chi2
-    alpha = 0.05
     chi_squared_result=chi2_contingency(observation)
     
     return print("Pearson stats of chi2 : ", chi_squared_result[0], "\n"
