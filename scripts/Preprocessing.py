@@ -21,7 +21,7 @@ class Preprocessing:
                     percent             = 70,
                     num_imput           = 'mean',
                     cat_imput           = 'mode',
-                    label_encode_method = 'label'
+                    label_encode_method = 'one_hot'
                 ):
 
         self.df                  = df
@@ -175,21 +175,27 @@ class Preprocessing:
 
         return self.df
     
-    def one_hot_encoding(self):
+    def one_hot_encoding(self, **kwargs):
         """Encode categorical features using OneHotEncoder
+        Args:
+            kwargs (any): method parameters
         Returns:
             df (DataFrame): return dataframe with categorical features encoded
         @Author: Thomas PAYAN
         """
         print("\nOneHot encoding")
 
-        encoded_df = OneHotEncoder(handle_unknown='ignore').fit_transform(self.df).toarray()
-        self.df = self.convert_numpy_to_pandas(encoded_df)
-
+        handle_unknown = kwargs.get('handle_unknown', 'ignore')
+        categories     = kwargs.get('categories', 'auto')
+        sparse_output  = kwargs.get('sparse_output', True)
+        encoded_df     = OneHotEncoder(handle_unknown=handle_unknown, categories=categories, sparse_output=sparse_output).fit_transform(self.df).toarray()
+        self.df        = self.convert_numpy_to_pandas(encoded_df)
         return self.df
     
-    def categorical_features_encoding(self):
+    def categorical_features_encoding(self, **kwargs):
         """Categorical features encoding
+        Args:
+            kwargs (any): method parameters
         Returns:
             df (DataFrame): return new encoding dataframe
         @Author: Thomas PAYAN
@@ -202,7 +208,7 @@ class Preprocessing:
             case 'label':
                 self.label_encoding()
             case 'one_hot':
-                self.one_hot_encoding()
+                self.one_hot_encoding(**kwargs)
             case _:
                 print("\nWarning : select another method !")
 
