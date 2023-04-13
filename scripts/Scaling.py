@@ -1,5 +1,4 @@
 from data_loader import *
-# from Preprocessing import *
 import pandas as pd
 
 from sklearn.preprocessing import MinMaxScaler
@@ -14,7 +13,7 @@ class Scaling:
     """Class to scaling pandas dataframe
     Args:
         df (DataFrame): pandas dataframe
-        scaling_method (string): method to scale pandas dataframe
+        method (string): method to scale pandas dataframe
     Returns:
         df (DataFrame): return scaled pandas dataframe
     @Author: Thomas PAYAN
@@ -22,12 +21,12 @@ class Scaling:
 
     def __init__(
                     self,
-                    df             = None,
-                    scaling_method = 'standard'
+                    df     = None,
+                    method = 'standard'
                 ):
 
-        self.df             = df
-        self.scaling_method = scaling_method
+        self.df     = df
+        self.method = method
 
     def convert_numpy_to_pandas(self, np_array):
         """Convert numpy array to pandas Dataframe
@@ -55,114 +54,134 @@ class Scaling:
 
         return self.df
 
-    def standard_scaler(self):
+    def standard_scaler(self, **kwargs):
         """Scale dataframe features with StandardScaler transformation
+        Args:
+            kwargs (any): method parameters
         Returns:
             scaled_df (DataFrame): return new scaled dataframe
         @Author: Thomas PAYAN
         """
         print("\nStandard scaling")
-        scaled_df = StandardScaler().fit_transform(self.df)
+        with_mean = kwargs.get('with_mean', True)
+        with_std  = kwargs.get('with_std', True)
+        scaled_df = StandardScaler(with_mean=with_mean, with_std=with_std).fit_transform(self.df)
         scaled_df = self.convert_numpy_to_pandas(scaled_df)
         return scaled_df
     
-    def min_max_scaler(self):
+    def min_max_scaler(self, **kwargs):
         """Scale dataframe features with MinMaxScaler transformation
+        Args:
+            kwargs (any): method parameters
         Returns:
             scaled_df (DataFrame): return new scaled dataframe
         @Author: Thomas PAYAN
         """
         print("\nMin-max scaling")
-        scaled_df = MinMaxScaler().fit_transform(self.df)
-        scaled_df = self.convert_numpy_to_pandas(scaled_df)
+        feature_range = kwargs.get('feature_range', (0,1))
+        scaled_df     = MinMaxScaler(feature_range=feature_range).fit_transform(self.df)
+        scaled_df     = self.convert_numpy_to_pandas(scaled_df)
         return scaled_df
     
-    def max_abs_scaler(self):
+    def max_abs_scaler(self, **kwargs):
         """Scale dataframe features with MaxAbsScaler transformation
+        Args:
+            kwargs (any): method parameters
         Returns:
             scaled_df (DataFrame): return new scaled dataframe
         @Author: Thomas PAYAN
         """
         print("\nMax-abs scaling")
-        scaled_df = MaxAbsScaler().fit_transform(self.df)
+        copy      = kwargs.get('copy', True)
+        scaled_df = MaxAbsScaler(copy=copy).fit_transform(self.df)
         scaled_df = self.convert_numpy_to_pandas(scaled_df)
         return scaled_df
     
-    def robust_scaler(self, quantile_start=25, quantile_end=75):
+    def robust_scaler(self, **kwargs):
         """Scale dataframe features with RobustScaler transformation
         Args:
-            quantile_start (integer) : start quantile range
-            quantile_end (integer) : end quantile range
+            kwargs (any): method parameters
         Returns:
             scaled_df (DataFrame): return new scaled dataframe
         @Author: Thomas PAYAN
         """
         print("\nRobust scaling")
-        scaled_df = RobustScaler(quantile_range=(quantile_start, quantile_end)).fit_transform(self.df)
-        scaled_df = self.convert_numpy_to_pandas(scaled_df)
+        with_centering = kwargs.get('with_centering', True)
+        with_scaling   = kwargs.get('with_scaling', True)
+        quantile_range = kwargs.get('quantile_range', (25.0, 75.0))
+        scaled_df      = RobustScaler(with_centering=with_centering, with_scaling=with_scaling, quantile_range=quantile_range).fit_transform(self.df)
+        scaled_df      = self.convert_numpy_to_pandas(scaled_df)
         return scaled_df
     
-    def power_transformation(self, method='yeo-johnson'):
+    def power_transformation(self, **kwargs):
         """Scale dataframe features with Power transformation
         Args:
-            method (tuple : {'yeo-johnson', 'box-cox'}) : power transform method
+            kwargs (any): method parameters
         Returns:
             scaled_df (DataFrame): return new scaled dataframe
         @Author: Thomas PAYAN
         """
         print("\nPower transformation ("+method+")")
-        scaled_df = PowerTransformer(method=method).fit_transform(self.df)
-        scaled_df = self.convert_numpy_to_pandas(scaled_df)
+        method      = kwargs.get('method', 'yeo-johnson')
+        standardize = kwargs.get('standardize', True)
+        scaled_df   = PowerTransformer(method=method, standardize=standardize).fit_transform(self.df)
+        scaled_df   = self.convert_numpy_to_pandas(scaled_df)
         return scaled_df
     
-    def quantile_transformation(self, n_quantiles=200, output_distribution='uniform'):
+    def quantile_transformation(self, **kwargs):
         """Scale dataframe features with Quantile transformation
         Args:
-            n_quantiles (integer) : number of quantiles to be computed
-            output_distribution (tuple : {'uniform', 'normal'}) : marginal distribution for the transformed data
+            kwargs (any): method parameters
         Returns:
             scaled_df (DataFrame): return new scaled dataframe
         @Author: Thomas PAYAN
         """
         print("\nQuantile transformation ("+output_distribution+")")
-        scaled_df = QuantileTransformer(n_quantiles=n_quantiles, output_distribution=output_distribution).fit_transform(self.df)
-        scaled_df = self.convert_numpy_to_pandas(scaled_df)
+        n_quantiles         = kwargs.get('n_quantiles', 200)
+        output_distribution = kwargs.get('output_distribution', 'yeo-johnson')
+        scaled_df           = QuantileTransformer(n_quantiles=n_quantiles, output_distribution=output_distribution).fit_transform(self.df)
+        scaled_df           = self.convert_numpy_to_pandas(scaled_df)
         return scaled_df
     
-    def normalize_transformation(self):
+    def normalize_transformation(self, **kwargs):
         """Scale dataframe features with Normalizer transformation
+        Args:
+            kwargs (any): method parameters
         Returns:
             scaled_df (DataFrame): return new scaled dataframe
         @Author: Thomas PAYAN
         """
         print("\nNormalize transformation")
-        scaled_df = Normalizer().fit_transform(self.df)
+        norm      = kwargs.get('norm', "l2")
+        scaled_df = Normalizer(norm=norm).fit_transform(self.df)
         scaled_df = self.convert_numpy_to_pandas(scaled_df)
         return scaled_df
 
-    def scaling_features(self):
+    def scaling_features(self, **kwargs):
         """Scale dataframe features
+        Args:
+            kwargs (any): method parameters
         Returns:
             df (DataFrame): return scaled dataframe features
         @Author: Thomas PAYAN
         """
         print("\nPerforming features scaling")
 
-        match self.scaling_method:
+        match self.method:
             case 'standard':
-                self.df = self.standard_scaler()
+                self.df = self.standard_scaler(**kwargs)
             case 'min_max':
-                self.df = self.min_max_scaler()
+                self.df = self.min_max_scaler(**kwargs)
             case 'max_abs':
-                self.df = self.max_abs_scaler()
+                self.df = self.max_abs_scaler(**kwargs)
             case 'robust':
-                self.df = self.robust_scaler()
+                self.df = self.robust_scaler(**kwargs)
             case 'power':
-                self.df = self.power_transformation()
+                self.df = self.power_transformation(**kwargs)
             case 'quantile':
-                self.df = self.quantile_transformation()
+                self.df = self.quantile_transformation(**kwargs)
             case 'normalize':
-                self.df = self.normalize_transformation()
+                self.df = self.normalize_transformation(**kwargs)
             case _:
                 print("\nWarning : select another method !")
 
@@ -183,9 +202,6 @@ if __name__ == "__main__":
     v_nrows     = 10000
 
     # Execute scaling
-    df_train = get_data(file_path=v_file_path, nrows=v_nrows)
-    # df_train = Preprocessing(df_train).preprocessing()
-    # print(df_train.head())
-    
+    df_train = get_data(file_path=v_file_path, nrows=v_nrows)    
     df_train = Scaling(df_train).scaling()
     print(df_train.head())
