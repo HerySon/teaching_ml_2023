@@ -4,21 +4,33 @@ from sklearn.ensemble import IsolationForest
 
 def outliers_process(df, columns, method = 'nan', k=1.5, sklearn_method=False):
     """
-    Detects and handles outliers in a pandas dataframe using Interquartile Range or IsolationForest detection method.
+    Detects and handles outliers in a pandas DataFrame using Interquartile Range or
+    IsolationForest detection method.
     If IQR method, mean or median calculated on all values in column.
     If IsolationForest method, mean or median calculated on all non-outlier values in column.
-    Args:
-        df : pandas dataframe (The input dataframe)
-        columns : list of str (The list of column names to handle outliers for)
-        method : str (default='nan').
-            The method to use for handling outliers. Available methods are 'nan', mean', 'median', and 'drop'
-        k : float (Default=1.5)
-            The multiplier for the IQR range
-        sklearn_method: bool (default=False)
-            Will use IQR method to detect and remove outliers if set False, else will use IsolationForest method
+
+    Keyword arguments:
+    ------------------
+        df: pandas.DataFrame
+            The input DataFrame.
+        columns: list of str
+            The list of column names to handle outliers for.
+        method: str, optional (default 'nan').
+            The method to use for handling outliers.
+            Available methods are 'nan', mean', 'median', and 'drop'
+        k: float, optional (default 1.5)
+            The multiplier for the IQR range.
+        sklearn_method: bool, optional (default False)
+            Will use IQR method to detect and remove outliers if set False,
+            else will use IsolationForest method.
+
     Returns:
-        df_outliers : the dataframe with outliers handled
+    --------
+        pandas.DataFrame
+            The DataFrame with outliers handled.
+
     Author:
+    -------
         Joëlle Sabourdy
     """
     df_outliers = df.copy()
@@ -86,7 +98,6 @@ def outliers_process(df, columns, method = 'nan', k=1.5, sklearn_method=False):
             raise ValueError("Invalid method. Allowed methods: 'nan','drop', 'median', 'mean'.")
             
     return df_outliers
-
 
 
 
