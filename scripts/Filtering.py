@@ -83,7 +83,6 @@ class Filtering:
             print("Deleting feature : "+feature)
         return self.df.drop(features, axis=1, inplace=True)
     
-    # Function to preprocess the Dataframe
     def filtering(self):
         """Filter dataframe
         Returns:
