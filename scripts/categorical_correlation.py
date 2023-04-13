@@ -4,8 +4,8 @@ import numpy as np
 #Viz
 import matplotlib.pyplot as plt
 #Chi2 test
-from  scipy.stats import chi2_contingency  
-from scipy.stats import chi2
+from sklearn.feature_selection import chi2
+from sklearn.feature_selection import SelectKBest
 
 
 def cross_table (df,index,columns) : 
