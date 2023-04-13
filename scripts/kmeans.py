@@ -5,7 +5,7 @@ from sklearn.cluster import KMeans
 
 def kmeans(dataset, k_min=2, k_max=10, method='elbow', inp_algo='auto', inp_init='k-means++', inp_n_init=10):
     """
-     This function will fit a KMeans model. You pass the OpenFoodFact dataset as entry and you get the fitted model at the end.
+    This function will fit a KMeans model. You pass the OpenFoodFact dataset as entry and you get the fitted model at the end.
     You can precise the number of cluster expected.
     Args :
         dataset -- the dataset who contains OpenFoodFact data (required)
