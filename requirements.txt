@@ -40,3 +40,5 @@ joblib
 pyyaml>=6.0
 # memoized-property
 # termcolor
+
+wordcloud
