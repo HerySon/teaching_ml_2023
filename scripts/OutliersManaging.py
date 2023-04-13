@@ -6,16 +6,18 @@ class OutliersManaging:
     Args:
         df (DataFrame): pandas dataframe
     Returns:
-        df (DataFrame): return preprocessed pandas dataframe
+        df (DataFrame): return managed pandas dataframe
     @Author: Thomas PAYAN
     """
 
     def __init__(
                     self,
-                    df = None
+                    df     = None,
+                    method = 'mean'
                 ):
 
-        self.df = df
+        self.df     = df
+        self.method = method
 
     def get_features_endswith(self, endswith, ft_exclude=[]):
         """Get features endswith method
@@ -48,7 +50,7 @@ class OutliersManaging:
         """
         info = None
 
-        match self.num_imput:
+        match self.method:
             case 'mean':
                 print('mean')
                 info = feature.mean()
@@ -62,7 +64,7 @@ class OutliersManaging:
         print(info)
         return info
     
-    def correct_features_100g(self):
+    def correct_features_100g(self, ft_exclude=[]):
         """Features correction ending with "_100g" (keep features expressed in percentage/grams)
             - Check feature : 0 <= min and max <= 100 and 0 <= mean <= 100
             - Perform an imputation of erroneous data (mean)
@@ -74,12 +76,14 @@ class OutliersManaging:
             - carbon-footprint_100g   : emprunte carbon 
             - nutrition-score-fr_100g : fr nutrition score
             - nutrition-score-uk_100g : uk nutrition score
+
+        Args:
+            ft_exclude (array) : list of excluded features
         Returns:
             df (DataFrame): return preprocessed dataframe
         @Author: Thomas PAYAN
         """
-        excluded_features = ['energy-kj_100g','energy-kcal_100g','ph_100g','carbon-footprint_100g','nutrition-score-fr_100g','nutrition-score-uk_100g']
-        df_100g           = self.get_features_endswith("_100g", excluded_features)
+        df_100g = self.get_features_endswith("_100g", ft_exclude)
 
         for feature in df_100g.columns.tolist():
             infos = self.df[feature].describe().loc[['min','mean','max']]
@@ -99,12 +103,13 @@ class OutliersManaging:
         return self.df
         
     def outliers_managing(self):
-        """Preprocess dataframe
+        """Managing outliers in pandas dataframe
         Returns:
-            df (DataFrame): return preprocessed dataframe
+            df (DataFrame): return managed dataframe
         @Author: Thomas PAYAN
         """
-        self.correct_features_100g()
+        ft_exclude = ['energy-kj_100g','energy-kcal_100g','ph_100g','carbon-footprint_100g','nutrition-score-fr_100g','nutrition-score-uk_100g']
+        self.correct_features_100g(ft_exclude)
     
         return self.df
         
