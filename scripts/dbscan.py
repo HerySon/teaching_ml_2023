@@ -1,7 +1,7 @@
 from sklearn.cluster import DBSCAN
 from sklearn.metrics import silhouette_score
 
-def dbscan_clustering(data, eps=0.5, min_samples=5):
+def dbscan_clustering(dataset, eps=0.5, min_samples=5):
     """
     Applies DBSCAN clustering to the input data and returns the cluster labels and the silhouette score.
     
@@ -20,12 +20,12 @@ def dbscan_clustering(data, eps=0.5, min_samples=5):
         The silhouette score of the clustering.
     """
     dbscan = DBSCAN(eps=eps, min_samples=min_samples)
-    labels = dbscan.fit_predict(data)
+    labels = dbscan.fit_predict(dataset)
     
     # Calculate silhouette score, ignoring outliers (-1)
     if -1 in labels:
-        silhouette = silhouette_score(data[labels!=-1], labels[labels!=-1])
+        silhouette = silhouette_score(dataset[labels!=-1], labels[labels!=-1])
     else:
-        silhouette = silhouette_score(data, labels)
+        silhouette = silhouette_score(dataset, labels)
     
     return labels, silhouette
