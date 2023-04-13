@@ -51,8 +51,8 @@ def multi_var_viz(dataset, parameter="heatmap", cols=None):
 
     # Part 2: Check parameters and column length
 
-    if len(num_cols) > 4 and parameter in ["pairplot", "3d_scatter", "kde_pairplot"]: 
-        print("More than 4 cols arguments could take several time, please reduce cols number")
+    if len(num_cols) > 10 and parameter in ["pairplot", "3d_scatter", "kde_pairplot"]: 
+        print("More than 10 cols arguments could take several time, please reduce cols number")
         return
     
     # Part 3: Switch parameters to choose graph types
