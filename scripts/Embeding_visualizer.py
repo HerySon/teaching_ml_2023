@@ -205,7 +205,7 @@ if __name__ == "__main__":
     df = df.fillna("unknown")
     # Create a list of all the ingredients
     ingredients = df["ingredients_text"].values.tolist()
-    ev = Embeding_vizalizer()
+    ev = Embeding_visualizer()
     # Generate the tokens
     tokens = ev.GenerateToken(ingredients)
     # Train the model
