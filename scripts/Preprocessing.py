@@ -1,5 +1,7 @@
 from data_loader import *
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder
 
 class Preprocessing:
     """Class to preprocessing pandas dataframe
@@ -15,16 +17,28 @@ class Preprocessing:
 
     def __init__(
                     self,
-                    df        = None,
-                    percent   = 70,
-                    num_imput = 'mean',
-                    cat_imput = 'mode'
+                    df                  = None,
+                    percent             = 70,
+                    num_imput           = 'mean',
+                    cat_imput           = 'mode',
+                    label_encode_method = 'label'
                 ):
 
-        self.df        = df
-        self.percent   = percent
-        self.num_imput = num_imput
-        self.cat_imput = cat_imput
+        self.df                  = df
+        self.percent             = percent
+        self.num_imput           = num_imput
+        self.cat_imput           = cat_imput
+        self.label_encode_method = label_encode_method
+
+    def convert_numpy_to_pandas(self, np_array):
+        """Convert numpy array to pandas Dataframe
+        Args:
+            np_array (array) : numpy array
+        Returns:
+            df (DataFrame): return pandas dataframe
+        @Author: Thomas PAYAN
+        """
+        return pd.DataFrame(np_array)
         
     def count_duplicated_values(self):
         """Count duplicated values for each feature
@@ -46,7 +60,6 @@ class Preprocessing:
         print("\nRows number after drop duplicated values : %s" % len(self.df))
         return self.df
 
-    # Functions to display missing values
     def display_missing_values(self): 
         """Display missing values
         @Author: Thomas PAYAN
@@ -131,19 +144,67 @@ class Preprocessing:
         self.display_missing_values()
         return self.df
 
-    def convert_categorical_features_to_numeric(self):
-        """Convert categorical features to numeric
+    def code_encoding(self):
+        """Encode categorical features using category codes
         Returns:
-            df (DataFrame): return dataframe with categorical features converted
+            df (DataFrame): return dataframe with categorical features encoded
         @Author: Thomas PAYAN
         """
-        print("\nPerforming categorical features convertion")
+        print("\nCategory codes encoding")
 
         df_cat = self.df.select_dtypes(include=["object"])
 
         for col in df_cat.columns.tolist():
             self.df[col] = self.df[col].astype('category')
             self.df[col] = self.df[col].cat.codes
+
+        return self.df
+    
+    def label_encoding(self):
+        """Encode categorical features using LabelEncoder
+        Returns:
+            df (DataFrame): return dataframe with categorical features encoded
+        @Author: Thomas PAYAN
+        """
+        print("\nLabel encoding")
+
+        df_cat = self.df.select_dtypes(include=["object"])
+
+        for cat in df_cat.columns.tolist():
+            self.df[cat] = LabelEncoder().fit_transform(self.df[cat])
+
+        return self.df
+    
+    def one_hot_encoding(self):
+        """Encode categorical features using OneHotEncoder
+        Returns:
+            df (DataFrame): return dataframe with categorical features encoded
+        @Author: Thomas PAYAN
+        """
+        print("\nOneHot encoding")
+
+        encoded_df = OneHotEncoder(handle_unknown='ignore').fit_transform(self.df).toarray()
+        self.df = self.convert_numpy_to_pandas(encoded_df)
+
+        return self.df
+    
+    def categorical_features_encoding(self):
+        """Categorical features encoding
+        Returns:
+            df (DataFrame): return new encoding dataframe
+        @Author: Thomas PAYAN
+        """
+        print("\nPerforming categorical features encoding")
+
+        match self.label_encode_method:
+            case 'code':
+                self.code_encoding()
+            case 'label':
+                self.label_encoding()
+            case 'one_hot':
+                self.one_hot_encoding()
+            case _:
+                print("\nWarning : select another method !")
 
         return self.df
 
@@ -159,7 +220,7 @@ class Preprocessing:
 
         self.impute_missing_values()
 
-        self.convert_categorical_features_to_numeric()
+        self.categorical_features_encoding()
     
         return self.df
         
