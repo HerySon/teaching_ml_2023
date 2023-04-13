@@ -7,16 +7,24 @@ from sklearn.metrics import silhouette_score
 
 def train_and_optimize_kmeans(data, feature_cols, num_clusters=3, max_clusters=10):
     """
+    ----------------------------------------------------------
+    Goal : 
+    ----------------------------------------------------------
     Trains and optimizes K-means on the OpenFoodFacts dataset.
-    
+    ---------------------------------------------------------
     Args:
+    -----------------------------------------------------------
         data_path (str): The path to the OpenFoodFacts dataset file.
         feature_cols (list): A list of column names for the features to be used for training.
-        num_clusters (int): The number of clusters to use for the initial K-means training. Default is 3.
-        max_clusters (int): The maximum number of clusters to try during the optimization. Default is 10.
-    
+        num_clusters (int): The number of clusters to use for the initial K-means training.
+                            Default is 3.
+        max_clusters (int): The maximum number of clusters to try during the optimization.
+                            Default is 10.
+    -------------------------------------------------------------
     Returns:
+    --------------------------------------------------------------
         The optimal number of clusters, as determined by the silhouette score.
+    ------------------------------------------------------------------------
     """
     
     
