@@ -1,9 +1,3 @@
-import pandas as pd
-import numpy as np
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import silhouette_score
 
 def train_and_optimize_kmeans(data, feature_cols, num_clusters=3, max_clusters=10):
     """
@@ -26,7 +20,13 @@ def train_and_optimize_kmeans(data, feature_cols, num_clusters=3, max_clusters=1
         The optimal number of clusters, as determined by the silhouette score.
     ------------------------------------------------------------------------
     """
-    
+    import pandas as pd
+    import numpy as np
+    from sklearn.cluster import KMeans
+    from sklearn.decomposition import PCA
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.metrics import silhouette_score
+
     
     # Select the feature columns
     X = data[feature_cols].values
