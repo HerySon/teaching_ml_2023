@@ -11,6 +11,7 @@ def scale_data(df, method,hyperparams=None):
         - method: method used to scale the data ('standard' for StandardScaler, 'norm' 
                  for Normalizer,'robust' for RobustScaler, 'minmax' for MinMaxScaler).
                  N.B: Default = 'standard'
+        -hyperparams : Given by the user depending of the method choosen
         -----------------------------------------------------------------------------
         Return :
         -  Returns a daframe.
