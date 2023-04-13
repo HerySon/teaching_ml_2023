@@ -65,11 +65,12 @@ def exclude_words(df, words, col_to_test="texts"):
     """
     return df[~df[col_to_test].isin(words)]
 
-def display_word_cloud(text, max_words=200, min_font_size=6, 
+def display_word_cloud(text, column, max_words=200, min_font_size=6,
                        width=2000, height=1000, collocations=False, mask=None):
     """Display basic word cloud from string
     Args:
         text (string): string to use for the word cloud
+        column (string): column name to viz
         args (WordCloud args): args provided to configurate the WordCloud: https://amueller.github.io/word_cloud/generated/wordcloud.WordCloud.html#wordcloud.WordCloud
     Returns:
     """
@@ -79,14 +80,16 @@ def display_word_cloud(text, max_words=200, min_font_size=6,
     cloud.generate(text)
     plt.axis("off")
     plt.imshow(cloud, interpolation="bilinear")
+    plt.title("Word cloud of " + column + " feature")
     plt.show()
     
-def display_word_cloud_frequencies(dicti, max_words=200, min_font_size=6, 
-                                   width=2000, height=1000, 
+def display_word_cloud_frequencies(dicti, column, max_words=200, min_font_size=6, 
+                                   width=2000, height=1000,
                                    collocations=False, mask=None):
     """Display basic word cloud from multidict
     Args:
         dicti (MultiDict): dictionnary with frequencies of words
+        column (string): column name to viz
         args (WordCloud args): args provided to configurate the WordCloud: https://amueller.github.io/word_cloud/generated/wordcloud.WordCloud.html#wordcloud.WordCloud
     Returns:
     """
@@ -96,6 +99,7 @@ def display_word_cloud_frequencies(dicti, max_words=200, min_font_size=6,
     cloud.generate_from_frequencies(dicti)
     plt.axis("off")
     plt.imshow(cloud, interpolation="bilinear")
+    plt.title("Word cloud of " + column + " feature")
     plt.show()
     
 def get_frequency_dict_from_text(sentence):
@@ -153,9 +157,10 @@ if __name__ == "__main__":
             'labels', 'countries', 'ingredients_text', 'states']
     to_viz_df = data.loc[:, cols]
     
+    col_to_viz = 'categories'
 
     # It is possible to explode string by delimiter
-    cat = explode_col_by_delimiter(to_viz_df, 'categories')
+    cat = explode_col_by_delimiter(to_viz_df, col_to_viz)
 
     # It is possible to get rid of stop words
     words = rid_of_stop_words(cat)
@@ -167,7 +172,7 @@ if __name__ == "__main__":
     words = exclude_words(words, words_to_exclude)
     
     #Word cloud with string
-    display_word_cloud(words['texts'].to_string())
+    display_word_cloud(words['texts'].to_string(), col_to_viz)
 
     ##Word cloud with frequency dictionnary
     #freq = get_frequency_dict_from_text(words['texts'].to_string())
