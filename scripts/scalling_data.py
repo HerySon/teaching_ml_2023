@@ -1,44 +1,52 @@
-import pandas as pd
-import numpy as np
-
-df = pd.read_csv(r"C:\Users\Fnac\Desktop\Trello ML\Trello_git/teaching_ml_2023/dataset_clean.csv", encoding='utf-8')
-
-def scale_data(df, method):
+def scale_data(df, method,hyperparams=None):
   
     """
-    Cette fonction prend en entrée un dataframe ensuite elle applique le scaling des données selon la méthode choisie (MinMax ou Standard ou norm ou robust ) et renvoie un daframe.
-    paramètres réquis:
-        - method: méthode utilisée pour mettre à l'échelle les données ('standard' pour StandardScaler, 'norm' pour Normalizer,'robust' pour RobustScaler, 'minmax' pour MinMaxScaler).
-          N.B : Par défaut = 'standard'
-        - df : charger à partir du dataset de OpenFoodFact
+        ------------------------------------------------------------------------------
+        Goal : 
+            - Applies data scaling according to the chosen method
+            (MinMax or Standard or norm or robust)
+        ------------------------------------------------------------------------------
+        Parameters:
+        - df : Dataset to be analyzed
+        - method: method used to scale the data ('standard' for StandardScaler, 'norm' 
+                 for Normalizer,'robust' for RobustScaler, 'minmax' for MinMaxScaler).
+                 N.B: Default = 'standard'
+        -----------------------------------------------------------------------------
+        Return :
+        -  Returns a daframe.
+        -----------------------------------------------------------------------------
     """
       
-    #Librairies utiles    
+    #Useful libraries  
     from sklearn.preprocessing import StandardScaler, MinMaxScaler, Normalizer, RobustScaler
     
-    # Sélection des variables numériques que nous souhaitons mettre à l'échelle
-    colonnes_float = df.select_dtypes(include=['float']).columns
+    #Selecting the numeric variables we want to scale
+    colonnes_float = df.select_dtypes(include=['number']).columns
     
-    # Gérer les valeurs manquantes en les remplaçant par la médiane
+    #Handle missing values by replacing them with the median
     df[colonnes_float] = df[colonnes_float].fillna(df[colonnes_float].median())
 
-    # Choix du scaler 
+    # Choice of scaler
     if method == "minmax":
-         scaler = MinMaxScaler()
+        scaler = MinMaxScaler(**hyperparams) if hyperparams else MinMaxScaler()
     elif method == "Standard":
-        scaler = StandardScaler()
+        scaler = StandardScaler() if hyperparams else StandardScaler()
     elif method == "norm":
-        scaler = Normalizer()
+        scaler = Normalizer() if hyperparams else Normalizer()
     elif method == "Robust":
-        scaler = RobustScaler()
+        scaler = RobustScaler() if hyperparams else RobustScaler()
     else:
-        print("Invalid method")
-        return None
+        raise ValueError(f"Unknown scaling method: {method}")
 
-    # Mettre à l'échelle les variables numériques sélectionnées
+    #Scale selected numeric variables
     df[colonnes_float] = scaler.fit_transform(df[colonnes_float])
 
-    # Retourner le jeu de données mis à l'échelle
+    # Return scaled dataset
     return df
 
-scale_data(df, "Robust")
+if __name__ == "__main__":
+    
+    # Apply MinMax scaling with custom hyperparameters
+    hyperparams = {"feature_range": (0, 1)}
+    df_scaled = scale_data(df, method="minmax", hyperparams=hyperparams)
+    print(df_scaled)
