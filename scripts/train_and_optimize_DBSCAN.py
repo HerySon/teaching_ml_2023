@@ -1,9 +1,3 @@
-import pandas as pd
-import numpy as np
-from sklearn.cluster import DBSCAN
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import silhouette_score
-
 def train_and_optimize_DBSCAN(data, feature_cols, eps_min=0.1, eps_max=1.0, eps_step=0.1, min_samples_min=2, min_samples_max=10, min_samples_step=1):
     """
     --------------------------------------------------------------------------
@@ -35,6 +29,13 @@ def train_and_optimize_DBSCAN(data, feature_cols, eps_min=0.1, eps_max=1.0, eps_
         as determined by the silhouette score.
     -------------------------------------------------------------------------------
     """
+    
+    import pandas as pd
+    import numpy as np
+    from sklearn.cluster import DBSCAN
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.metrics import silhouette_score
+
     
     # Select the feature columns
     X = data[feature_cols].values
