@@ -37,6 +37,11 @@ def split_ean13(df, drop_ean13=False):
     df['EAN13_company'] = np.nan
     df['EAN13_product'] = np.nan
     
+    # Define new columns as string type
+    df['EAN13_country'] = df['EAN13_country'].astype(str)
+    df['EAN13_company'] = df['EAN13_country'].astype(str)
+    df['EAN13_product'] = df['EAN13_country'].astype(str)
+
     # Loop over rows
     for i, row in df.iterrows():
         ean = str(row['code'])
@@ -66,6 +71,40 @@ def split_ean13(df, drop_ean13=False):
 
 
 
+def decode_country(df, filepath_country):
+    """
+    This function decodes the country from the EAN13_country column of a DataFrame using a CSV file
+    containing the correspondence between country codes and prefixes.
+
+    Keyword arguments:
+    ------------------
+        df: pandas.DataFrame
+            The input dataframe containing the prefix column named 'EAN13_country'.
+        filepath_country: filepath
+            The filepath of the CSV file containing the correspondence between country codes and prefixes.
+            The file must contain 2 columns : "Prefix" and "country_EAN13")
+
+    Returns:
+    --------
+        pandas.DataFrame
+            The pandas DataFrame with a new column named "country_EAN13" containing the decoded country names.
+
+    Author:
+    -------
+        Joëlle Sabourdy
+    """
+    # Read CSV file
+    country_codes = pd.read_csv(filepath_country, sep=";", encoding='ISO-8859-1', dtype={'Prefix':str})
+        
+    # Merge the country_df and df dataframes on the EAN13_country column
+    df = pd.merge(df, country_codes, left_on='EAN13_country', right_on='Prefix', how='left')
+    
+    # Drop the prefix column and return the dataframe
+    df.drop('Prefix', axis=1, inplace=True)
+    return df
+
+
+
 if __name__ == "__main__":
     # Consider dataset containing ramen product
     df = pd.DataFrame({
@@ -75,4 +114,8 @@ if __name__ == "__main__":
         })
     # Split code column
     df = split_ean13(df, drop_ean13=False)
+
+    # Decode the country code
+    filepath_country = "../data/gs1_country_code.csv"
+    df = decode_country(df, filepath_country)
     print(df)
