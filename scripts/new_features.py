@@ -74,7 +74,7 @@ def split_ean13(df, drop_ean13=False):
 def decode_country(df, filepath_country):
     """
     This function decodes the country from the EAN13_country column of a DataFrame using a CSV file
-    containing the correspondence between country codes and prefixes.
+    containing the correspondence between country codes and prefixes (data from GS1.org).
 
     Keyword arguments:
     ------------------
