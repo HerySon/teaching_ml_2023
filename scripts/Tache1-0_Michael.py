@@ -6,7 +6,7 @@ from data_loader import get_data
 """
 Tache 1.0 : 
 
-outliers_gestion(dataset) :
+clean_data(dataset, null_values_percent_authorized = 30, n_neighbors=5):
 
     This function cleans the dataframe passed as parameter:
     The arguments passed as parameters are:
