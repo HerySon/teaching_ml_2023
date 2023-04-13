@@ -67,7 +67,7 @@ def distplot2x2(food, cols):
     axis = [axes[0,0],axes[0,1],axes[1,0],axes[1,1]]
     for n, col in enumerate(cols):
         sb.histplot(food[col].dropna(), color=colors[n], ax=axis[n], kde=True)
-    #plt.show()
+    plt.show()
 
 
 
@@ -90,3 +90,5 @@ def clean_100g_columns(df):
 
         df[col] = df[col].apply(lambda x: x if 0 <= x <= 100 else None)
     return df
+
+

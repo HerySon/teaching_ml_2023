@@ -38,8 +38,8 @@ if __name__ == "__main__":
     data = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=50)
     print(f"data set shape is {data.shape}")
     data_cleaning.print_columns(data)
-
-
+    # Pass the column names as a list
+    data_cleaning.distplot2x2(data, ['energy_100g','fat_100g','saturated-fat_100g','trans-fat_100g'])
 
 
 
