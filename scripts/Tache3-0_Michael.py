@@ -51,3 +51,8 @@ def outliers_gestion(dataset, cols=None):
             median = dataset_copy[col].median()
             dataset_copy.loc[outliers_index, col] = median
     return dataset_copy
+
+if __name__ == "__main__":
+    data = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=50)
+    print(f"data set shape is {data.shape}") 
+    data = outliers_gestion(data)
