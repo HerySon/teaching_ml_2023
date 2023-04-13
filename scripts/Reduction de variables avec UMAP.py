@@ -48,7 +48,7 @@ to reduce the dimensions of our df dataset. For exemple
 from sklearn.pipeline import Pipeline
 
 
-# Create a pipeline with UMAPTransformer and a  classifier
+# Create a pipeline with UMAPTransformer and a classifier
 pipeline = Pipeline([
     ('umap', UMAPTransformer()),
     ('classifier', RandomForestClassifier())
