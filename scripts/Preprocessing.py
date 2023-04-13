@@ -207,7 +207,89 @@ class Preprocessing:
                 print("\nWarning : select another method !")
 
         return self.df
+    
+    def get_features_endswith(self, endswith, ft_exclude=[]):
+        """Get features endswith method
+        Args:
+            endswith (string|tuple) : list of features ending with
+            ft_exclude (array) : list of features to exclude
+        Returns:
+            df_endswith (DataFrame): return selected features pandas dataframe
+        @Author: Thomas PAYAN
+        """
+        print("\nGet features endswith")
+        ft_endswith = []
+        ft_list     = self.df.columns
+        
+        for feature in ft_list.tolist():
+            if feature.endswith(endswith):
+                ft_endswith.append(feature)
 
+        res = filter(lambda i: i not in ft_exclude, ft_endswith)
+        df_endswith = self.df[res]
+        return df_endswith
+    
+    def get_feature_info(self, feature):
+        """Get features information
+        Args:
+            feature (Dataframe) : feature to extract information
+        Returns:
+            info (DataFrame): return information
+        @Author: Thomas PAYAN
+        """
+        info = None
+
+        match self.num_imput:
+            case 'mean':
+                print('mean')
+                info = feature.mean()
+            case 'median':
+                info = feature.median()
+            case 'mode':
+                info = feature.mode().iloc[0]
+            case _:
+                print("\nWarning : select another method !")
+
+        print(info)
+        return info
+    
+    def correct_features_100g(self):
+        """Features correction ending with "_100g" (keep features expressed in percentage/grams)
+            - Check feature : 0 <= min and max <= 100 and 0 <= mean <= 100
+            - Perform an imputation of erroneous data (mean)
+        
+        Exclude the following variables :
+            - energy-kj_100g          : unit in kj
+            - energy-kcal_100g        : unit in kcal
+            - ph_100g                 : unit in ph
+            - carbon-footprint_100g   : emprunte carbon 
+            - nutrition-score-fr_100g : fr nutrition score
+            - nutrition-score-uk_100g : uk nutrition score
+
+        Returns:
+            df (DataFrame): return preprocessed dataframe
+        @Author: Thomas PAYAN
+        """
+        excluded_features = ['energy-kj_100g','energy-kcal_100g','ph_100g','carbon-footprint_100g','nutrition-score-fr_100g','nutrition-score-uk_100g']
+        df_100g           = self.get_features_endswith("_100g", excluded_features)
+
+        for feature in df_100g.columns.tolist():
+            infos = self.df[feature].describe().loc[['min','mean','max']]
+            if not pd.isna(infos['min']):
+                if infos['min'] <= 0 or 100 <= infos['max']:
+                    if 0 <= infos['mean'] <= 100:
+                        print("Mean OK ! Probably some wrong values : min|max\nImpute processing...")
+                        correct_value = self.get_feature_info(self.df[feature])
+                        self.df.loc[(self.df[feature] < 0) | (100 < self.df[feature]), feature] = correct_value
+                    else:
+                        print("Mean KO ! Probably some wrong values : min|max|mean\nDon't process imputing...")
+                else:
+                    print("Good values")
+            else:
+                print("NaN values")
+
+        return self.df
+        
     def preprocessing(self):
         """Preprocess dataframe
         Returns:
@@ -219,6 +301,8 @@ class Preprocessing:
         self.drop_missing_values()
 
         self.impute_missing_values()
+
+        self.correct_features_100g()
 
         self.categorical_features_encoding()
     
