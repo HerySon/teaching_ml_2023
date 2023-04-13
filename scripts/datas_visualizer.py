@@ -1,11 +1,9 @@
-from typing import Union
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import plotly.express as px
 from datetime import datetime
 
 class datas_visualizer():
+    # Constructor
     def __init__(self, datas : pd.DataFrame = None) -> None:
         """Data visualizer
         Args:
@@ -24,47 +22,50 @@ class datas_visualizer():
         }
         pass
 
+    # Override the __setattr__ function to add validation (ex : dv.datas = pd.DataFrame())
     def __setattr__(self, __name: str, __value) -> None:
-        """Fonction de validation des attributs à l'assignation
+        """Override the __setattr__ function to add validation
             ex : self.datas = pd.DataFrame()
         """
-        # Empêche la modification de l'attribut _available_plots
+        # Prevent the user to change the available plots
         if __name == "_available_plots" and hasattr(self, "_available_plots"):
             raise AttributeError("L'attribut _available_plots est en lecture seule")
+        # Check if the datas is a dataframe and not empty
         if __name == "datas" and hasattr(self, "datas"):
             if not isinstance(__value, pd.DataFrame) or __value.empty:
                 raise TypeError("datas doit être un DataFrame non vide")
         super().__setattr__(__name, __value)
 
-
+    # function to set datas
     def set_datas(self, datas: pd.DataFrame):
         self.datas = datas
 
 
-    # Plot les données à l'aide de pyplot
+    # Plot datas using plotly
     def plot(self, x : str, y : str = None, title : str = "", x_label : str = "x", y_label : str = "y",
              color : str = None, figsize : tuple = None, plot_type : str = "scatter", additionnal_params : dict = None,
              save : bool = False, save_path : str = None, show : bool = True) -> None:
-        """Plot les données
+        """Plot the datas using plotly
         Args:
-            x (str): colonne à utiliser pour l'axe des abscisses
-            y (str, optionnel): colonne à utiliser pour l'axe des ordonnées
-            title (str, optionnel): titre du graphique
-            x_label (str, optionnel): label de l'axe des abscisses
-            y_label (str, optionnel): label de l'axe des ordonnées
-            colors (str, optionnel): colonne résponsable de la couleur du graphique
-            figsize (tuple, optionnel): taille du graphique
-            plot_type (str, optionnel): type de graphique
-            additionnal_params (dict, optionnel): paramètres additionnels
-            save (bool, optionnel): sauvegarde le graphique
-            save_path (str, optionnel): chemin de sauvegarde
-            show (bool, optionnel): affiche le graphique
+            x (str): column to use for the x axis
+            y (str, optionnel): column to use for the y axis
+            title (str, optionnel): title of the graph
+            x_label (str, optionnel): label of the x axis
+            y_label (str, optionnel): label of the y axis
+            colors (str, optionnel): column to use for the colors
+            figsize (tuple, optionnel): size of the graph
+            plot_type (str, optionnel): type of the graph
+            additionnal_params (dict, optionnel): additionnal params for the graph
+            save (bool, optionnel): save the graph
+            save_path (str, optionnel): path to save the graph
+            show (bool, optionnel): show the graph
         """
+        # Check if the dataset if empty or not
         if self.datas is None or not isinstance(self.datas, pd.DataFrame) or self.datas.empty:
             raise ValueError("Le dataframe entrée est vide")
 
-        # Vérifications des arguments de la fonction
-        # Vérification des colones
+        # Check the method arguments
+        # Check colomns
         if x not in self.datas.columns:
             raise ValueError(f"La colonne x : '{x}' n'existe pas (colonne disponible : {self.datas.columns})")
         if y is not None and y not in self.datas.columns:
@@ -72,13 +73,13 @@ class datas_visualizer():
         if color is not None and color not in self.datas.columns:
             raise ValueError(f"La colonne color : '{color}' n'existe pas (colonne disponible : {self.datas.columns})")
         
-        # Vérification des paramètres généraux
+        # Check general params
         if plot_type not in self._available_plots.keys():
             raise ValueError(f"Le type de graphique '{plot_type}' n'est pas disponible, les types disponibles sont : {self._available_plots.keys()}")
         if (isinstance(figsize, tuple) and len(figsize) != 2) or (figsize is not None and not isinstance(figsize, list)):
             raise TypeError("figsize doit être de type tuple de taille 2, reçu : " + str(type(figsize)) + ((" de taille " + str(len(figsize)) if isinstance(figsize, tuple) else "")))
         
-        # Vérifications des types
+        # Check types
         if not isinstance(save, bool):
             raise TypeError("save doit être de type bool, reçu : " + str(type(save)))
         if not isinstance(show, bool):
@@ -94,17 +95,13 @@ class datas_visualizer():
         if additionnal_params is not None and not isinstance(additionnal_params, dict):
             raise TypeError("additionnal_params doit être de type dict, reçu : " + str(type(additionnal_params)))
         
-        # Liste des paramètres du graphique
+        # List of the graph's params
         params = {
             "x": x,
-            "title": title,
-            "labels": {
-                "x": x_label,
-                "y": y_label
-            }
+            "title": title
         }
 
-        # Ajout des paramètres optionnels
+        # Add optional params
         if y is not None:
             params["y"] = y
         if color is not None:
@@ -113,18 +110,23 @@ class datas_visualizer():
         if additionnal_params is not None:
             params.update(additionnal_params)
 
-        # Création du graphique en utilisant plotly
+        # Generate the graph type with the params
         fig = self._available_plots[plot_type](self.datas, **params)
-        # Modification de la taille du graphique
+        # Change the size of the graph
         if figsize is not None:
             fig.update_layout(
                 width=figsize[0],
                 height=figsize[1]
             )
-        # Affichage du graphique
+        # Change label if not empty
+        if x_label is not None or x_label != "":
+            fig.update_xaxes(title=x_label)
+        if y_label is not None or y_label != "":
+            fig.update_yaxes(title=y_label)
+        # Show the graph
         if show:
             fig.show()
-        # Sauvegarde du graphique
+        # Save the graph
         if save:
             if save_path is None:
                 save_path = "../results/plot " + datetime.now().strftime("%d-%m-%Y %H-%M-%S") + ".png"
@@ -134,11 +136,11 @@ class datas_visualizer():
 
 if "__main__" == __name__:
     # Exemple
-    # Chargement des données
+    # Load the exemple datas
     datas = pd.read_csv("https://raw.githubusercontent.com/plotly/datasets/master/iris.csv")
-    # Création de l'objet
+    # Generate the visualizer
     dv = datas_visualizer(datas)
-    # Affichage des données
+    # Show the datas
     dv.plot(x="SepalWidth", y="SepalLength", plot_type="hist", color="Name",
             additionnal_params={"barmode": "group"}, save=True, show=True)
     
