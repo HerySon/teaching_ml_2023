@@ -4,7 +4,8 @@ from sklearn.feature_selection import VarianceThreshold
 import unittest
 import numpy as np
 import matplotlib.pyplot as plt
-
+from fsfc.generic import NormalizedCut
+from sklearn.metrics.pairwise import rbf_kernel
 
 class FeatureSelection:
     def __init__(self, df):
@@ -101,9 +102,73 @@ class FeatureSelection:
 
         self.set_df(self.df.loc[: , disp_ratio.index])        
 
+    #def normalized_cut_score_by_feat(self, x='auto', auto_ordinal_encode=True):
+    #    """Calculate the score for each feat using NormalizedCut model
+    #    Args:
+    #        x (integer): Number of features to keep
+    #        auto_ordinal_encode (boolean, optional): If true, encode categorical features
+    #            By default True
+    #    Returns:
+    #        normalized_cut fitted model
+    #    @Author: Nicolas THAIZE
+    #    """
+    #    if auto_ordinal_encode:
+    #        self.set_df(self.ordinal_encoding(self.df))
+    #    self.set_df(self.df.dropna(axis=1, how='any'))
+
+    #    if x=="auto":
+    #        x=len(self.df.columns)
+    #    response = NormalizedCut(x)._calc_scores(self.df)
+    #    return response
+
+    #def normalized_cut_fit(self, x, prep_data=False):
+    #    """Fit a normalized cut model
+    #    Args:
+    #        x (integer): Number of features to keep
+    #        prep_data (boolean, optionnal): simple data cleaning
+    #            By default False
+    #    Returns:
+    #        normalized_cut fitted model
+    #    @Author: Nicolas THAIZE
+    #    """
+    #    if prep_data:
+    #        self.prep_data()
+    #    return NormalizedCut(x).fit(self.df)
+
+    #def normalized_cut_transform(self, normalized_cut, prep_data=False):
+    #    """Transform a dataset using a fitted normalized cut model
+    #    Args:
+    #        normalized_cut (NormalizedCut): Fitted normalized cut model
+    #        prep_data (boolean, optionnal): simple data cleaning
+    #            By default False
+    #    Returns:
+    #        ndarray of transformed data
+    #    @Author: Nicolas THAIZE
+    #    """
+    #    if prep_data:
+    #        self.prep_data()
+    #    return normalized_cut.transform(self.df)
+
+    #def prep_data(self):
+    #    """Really simple data preparation to prevent errors during functions tests
+    #    Args:
+    #    Returns:
+    #        filtered dataset
+    #    @Author: Nicolas THAIZE
+    #    """
+    #    self.set_df(self.ordinal_encoding(self.df))
+    #    self.set_df(self.df.dropna(axis=1, how='any'))
 
 if __name__ == "__main__":
     df = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=50)
+    
+    
+    
+    # Normalized cut example
+    #feature_selection = FeatureSelection(df)
+    #print(feature_selection.normalized_cut_score_by_feat())
+    
+    # Dispertion ratio example
     feature_selection = FeatureSelection(df)
     feature_selection.plot_dispertion_ratio()
     feature_selection.drop_columns_by_dispertion_ratio_value()
@@ -136,5 +201,4 @@ if __name__ == "__main__":
             assert_val = isSubset(df.columns.to_list(), feature_selection.columns.to_list())
 
             self.assertTrue(assert_val, "Cols are not included")
-    
     #unittest.main()
