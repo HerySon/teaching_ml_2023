@@ -8,7 +8,7 @@ def train_and_optimize_kmeans(data, feature_cols, num_clusters=3, max_clusters=1
     ---------------------------------------------------------
     Args:
     -----------------------------------------------------------
-        data_path (str): The path to the OpenFoodFacts dataset file.
+        data(str): The path to the OpenFoodFacts dataset file.
         feature_cols (list): A list of column names for the features to be used for training.
         num_clusters (int): The number of clusters to use for the initial K-means training.
                             Default is 3.
