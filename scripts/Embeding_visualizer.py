@@ -39,8 +39,9 @@ class Embeding_visualizer():
             # Convertir les phrases en liste de mots
             token = simple_preprocess(sentence)
             # Remove the stop words
-            stop_words = stopwords.words('french')
-            token = [word for word in token if word not in stop_words]
+            stop_words_french = stopwords.words('french')
+            stop_words_english = stopwords.words('english')
+            token = [word for word in token if word not in stop_words_french and word not in stop_words_english]
             tokens.append(token)
 
         return tokens
@@ -62,7 +63,7 @@ class Embeding_visualizer():
         return self.model.wv.key_to_index
 
 
-    def getMostSimilarWords(self, word: str, topn: int = 10, similar : bool = True) -> list:
+    def getMostSimilarWords(self, word: str, topn: int = 10, similar : bool = True, return_only_world : bool = True) -> list:
         """Get the most similar words
             args :
                 word (str) :
@@ -84,9 +85,13 @@ class Embeding_visualizer():
             raise TypeError("similar must be a bool")
         
         if similar:
-            return self.model.wv.most_similar(word, topn=topn)
+            result = self.model.wv.most_similar(word, topn=topn)
         else:
-            return self.model.wv.most_similar(negative=[word], topn=topn)
+            result = self.model.wv.most_similar(negative=[word], topn=topn)
+        if return_only_world:
+            return [word[0] for word in result]
+        else:
+            return result
 
 
     def getWordVector(self, word: str) -> list:
@@ -200,7 +205,7 @@ class Embeding_visualizer():
 
 if __name__ == "__main__":
     # Exemple
-    df = pd.read_csv("./data/en.openfoodfacts.org.products.csv", sep="\t", nrows=100)
+    df = pd.read_csv("./data/en.openfoodfacts.org.products.csv", sep="\t", nrows=1000)
     # fill all the nan values with "unknown"
     df = df.fillna("unknown")
     # Create a list of all the ingredients
@@ -213,4 +218,4 @@ if __name__ == "__main__":
     # Get the most similar words
     tsne_model, new_values = ev.get_tsne_transform(list(trainedWord.keys()), perplexity=10.0, n_components=2)
     # Plot the tsne values
-    ev.plot_tsne(new_values)
+    ev.plot_tsne(new_values, figsize=(16, 16))
