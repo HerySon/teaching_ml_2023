@@ -1,69 +1,57 @@
-def Filter_df(df, num_cols=None, ordinal_cols=None, nominal_cols=None, cat_threshold=50):
+def filter_columns(df, numeric=True, ordinal=True, nominal=True, max_categories=None, downcast=False):
     """
-    --------------------------------------------------------------------------
-    Goals : Filter and select columns based on their data types and categories
-    --------------------------------------------------------------------------
-    Parameters
-    --------------------------------------------------------------------------
-        +df: DataFrame to select columns from
-        +num_cols: List of column names for numeric variables
-        +ordinal_cols: List of column names for ordinal categorical variables
-        +nominal_cols: List of column names for nominal categorical variables
-        +cat_threshold: Maximum number of categories for nominal variables
     -------------------------------------------------------------------------
-    En sortie: DataFrame with selected columns
-    -------------------------------------------------------------------------
-    @Author: GBE Grâce
+    Filters and selects relevant columns in a dataframe.
+    ------------------------------------------------------------------------
+    Parameters:
+    ------------------------------------------------------------------------
+    df : The input dataframe to filter columns for.
+    numeric : bool, optional (default=True)
+        Whether to include numerical columns in the output.
+    ordinal : bool, optional (default=True)
+        Whether to include ordinal categorical columns in the output.
+    nominal : bool, optional (default=True)
+        Whether to include nominal categorical columns in the output.
+    max_categories : int, optional (default=None)
+        The maximum number of categories a categorical variable can have to be included in the output.
+        If None, all categorical variables will be included.
+    downcast : bool, optional (default=False)
+        Whether to downcast numerical variables to a smaller datatype to save memory.
+    ---------------------------------------------------------------------------
+    Returns:
+    ---------------------------------------------------------------------------
+        The filtered dataframe with relevant columns selected.
     """
+
+    # Separating numerical, ordinal categorical and nominal categorical columns
+    numeric_cols = list(df.select_dtypes(include=['number']).columns)
+    ordinal_cols = []
+    nominal_cols = []
+    for col in df.select_dtypes(include=['category']):
+        if len(df[col].unique()) == 2:
+            ordinal_cols.append(col)
+        elif max_categories is None or len(df[col].unique()) <= max_categories:
+            nominal_cols.append(col)
+
+    # Selecting relevant columns based on variable types
+    relevant_cols = []
+    if numeric:
+        relevant_cols += numeric_cols
+    if ordinal:
+        relevant_cols += ordinal_cols
+    if nominal:
+        relevant_cols += nominal_cols
     
-    # Convert numeric columns with low cardinality to int or float for memory optimization
-    if num_cols:
-        for col in num_cols:
-            if np.issubdtype(df[col].dtype, np.integer):
-                if df[col].nunique() < len(df) * 0.5:
-                    df[col] = pd.to_numeric(df[col], downcast='integer')
-                else:
-                    df[col] = pd.to_numeric(df[col], downcast='signed')
-            else:
-                if df[col].nunique() < len(df) * 0.5:
-                    df[col] = pd.to_numeric(df[col], downcast='float')
-                else:
-                    df[col] = pd.to_numeric(df[col], downcast='signed')
+    # Downcasting numerical columns if specified
+    if downcast:
+        for col in numeric_cols:
+            df[col] = pd.to_numeric(df[col], downcast='signed')
 
-    # Select numeric columns
-    if num_cols:
-        num_df = df[num_cols]
-    else:
-        num_df = pd.DataFrame()
-
-    # Select ordinal categorical columns
-    if ordinal_cols:
-        ordinal_df = df[ordinal_cols].astype('category')
-    else:
-        ordinal_df = pd.DataFrame()
-
-    # Select nominal categorical columns with low cardinality
-    if nominal_cols:
-        nominal_df = pd.DataFrame()
-        for col in nominal_cols:
-            if df[col].nunique() <= cat_threshold:
-                nominal_df[col] = df[col].astype('category')
-    else:
-        nominal_df = pd.DataFrame()
-
-    # Combine selected columns into one DataFrame
-    selected_df = pd.concat([num_df, ordinal_df, nominal_df], axis=1)
-
-    return selected_df
-
-
+    # Returning filtered dataframe
+    return df[relevant_cols]
 
 if __name__ == "__main__":
     
-    num_cols = ['energy_100g', 'fat_100g', 'carbohydrates_100g', 'sugars_100g', 'fiber_100g', 'proteins_100g']
-    ordinal_cols = ['nutrition-score-fr_100g']
-    nominal_cols = ['brands', 'countries', 'categories', 'labels']
+    filtered_df = filter_columns(df, nominal=True, ordinal=True, numeric=True, max_categories=3, downcast=True)
 
-    selected_df = Filter_df(df, num_cols=num_cols, ordinal_cols=ordinal_cols, nominal_cols=nominal_cols, cat_threshold=50)
-
-    print(selected_df)
+    print(filtered_df.dtypes)
