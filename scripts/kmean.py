@@ -78,11 +78,32 @@ def silhouette_score(data, labels):
     """
     return ss(data, labels)
 
+def plot_radar_chart(ax, data, column_names, cluster_number, color):
+    num_vars = len(column_names)
+    angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+    data = np.concatenate((data, [data[0]]))
+    angles += angles[:1]
 
+    ax.plot(angles, data, color=color, linewidth=2, linestyle='solid', label=f'Cluster {cluster_number}')
+    ax.fill(angles, data, color=color, alpha=0.25)
+    ax.set_yticklabels([])
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(column_names)
+
+def plot_all_clusters(cluster_centroids, column_names, title='Radar Chart - All Clusters'):
+    colors = ['blue', 'green', 'red', 'purple', 'orange', 'cyan']
+
+    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+    for i, centroid in enumerate(cluster_centroids):
+        plot_radar_chart(ax, centroid, column_names, i + 1, colors[i % len(colors)])
+
+    ax.set_title(title, size=20, color='black', y=1.1)
+    ax.legend(loc='upper right', bbox_to_anchor=(1.2, 1.2))
+    plt.show()
 
 
 def test():
-    df = data_loader.get_data(file_path="../data/en.openfoodfacts.org.products.csv", nrows=50)
+    df = data_loader.get_data(file_path="../data/en.openfoodfacts.org.products.csv", nrows=500)
     # Preprocess the data: choose relevant columns and handle missing values
     selected_columns = ['energy_100g', 'fat_100g', 'carbohydrates_100g', 'proteins_100g', 'fiber_100g']
     df = df[selected_columns]
@@ -104,8 +125,11 @@ def test():
     # Calculate the Silhouette score for a given clustering
     kmeans = KMeans(n_clusters=3, n_init=10, random_state=0)
     kmeans.fit(data_scaled)
+    cluster_centroids = kmeans.cluster_centers_
     labels = kmeans.labels_
     score = silhouette_score(data_scaled, labels)
     print("Silhouette score:", score)
+    # Plot radar chart for all cluster centroids
+    plot_all_clusters(cluster_centroids, selected_columns)
 
-#test()
+test()
