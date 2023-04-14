@@ -1,3 +1,6 @@
+########################
+#Selection des features#
+########################
 import pandas as pd
 import numpy as np
 from sklearn.feature_selection import SelectKBest, mutual_info_classif, f_classif, chi2, SelectFromModel
@@ -7,7 +10,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 # Load data
-data = pd.read_csv('data.csv')
+data = df
 X = data.iloc[:, :-1]
 y = data.iloc[:, -1]
 
