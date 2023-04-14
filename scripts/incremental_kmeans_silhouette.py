@@ -49,8 +49,5 @@ def incremental_kmeans_with_silhouette(dataset_iterator, batch_size, num_cluster
         
         # Add the cluster labels to the dataset
         dataset.loc[dataset_batch.index, 'cluster'] = labels
-    
-    # Plot the clusters using Seaborn
-    sns.pairplot(dataset, hue='cluster')
-    
+
     return dataset
