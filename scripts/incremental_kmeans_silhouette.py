@@ -3,7 +3,7 @@ from sklearn.metrics import silhouette_score, silhouette_samples
 import numpy as np
 import matplotlib.pyplot as plt
 
-def incremental_kmeans_with_silhouette(dataset, n_clusters=8, batch_size=1000, init_size=None):
+def incremental_kmeans_with_silhouette(dataset, n_clusters, batch_size, init_size=None):
     """
     Perform incremental KMeans clustering on a dataset and return the dataset with cluster labels.
     
