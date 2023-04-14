@@ -1,53 +1,77 @@
 from sklearn.cluster import MiniBatchKMeans
-from sklearn.metrics import silhouette_score
-import seaborn as sns
+from sklearn.metrics import silhouette_score, silhouette_samples
+import numpy as np
+import matplotlib.pyplot as plt
 
-def incremental_kmeans_with_silhouette(dataset_iterator, batch_size, num_clusters):
+def incremental_kmeans_with_silhouette(dataset, n_clusters=8, batch_size=1000, init_size=None):
     """
-    Performs incremental KMeans clustering with the silhouette method on a large dataset.
-
-    Args:
-    - dataset_iterator: an iterator that returns a batch of the dataset on each iteration.
-    - batch_size: the size of each batch to use for clustering.
-    - num_clusters: the number of clusters to use in the KMeans algorithm.
-
-    Returns:
-    - The dataset with cluster labels.
-    """
-    # Create an instance of MiniBatchKMeans
-    kmeans = MiniBatchKMeans(n_clusters=num_clusters, batch_size=batch_size)
+    Perform incremental KMeans clustering on a dataset and return the dataset with cluster labels.
     
-    # Initialize the best silhouette score to -1
-    best_silhouette_score = -1
-    
-    # Loop over the batches of the dataset
-    for dataset_batch in dataset_iterator:
-        # Extract the numeric columns from the current batch
-        numeric_cols = dataset_batch.select_dtypes(include='number')
+    Parameters:
+    -----------
+    dataset : pandas DataFrame
+        The input dataset.
+    n_clusters : int, optional (default=8)
+        The number of clusters to form.
+    batch_size : int, optional (default=1000)
+        The size of the mini-batches.
+    init_size : int, optional (default=None)
+        Number of samples to randomly initialize KMeans at the beginning.
         
-        # Fit the KMeans model to the current batch and predict the cluster labels
-        kmeans.partial_fit(numeric_cols)
+    Returns:
+    --------
+    dataset : pandas DataFrame
+        The input dataset with an additional 'cluster' column containing cluster labels.
+    """
+    # Extract the numeric columns from the dataset
+    numeric_cols = dataset.select_dtypes(include='number')
+    
+    # Initialize the MiniBatchKMeans algorithm
+    kmeans = MiniBatchKMeans(n_clusters=n_clusters, batch_size=batch_size, init_size=init_size, random_state=42)
+    
+    # Initialize the silhouette scores list
+    silhouette_scores = []
+    
+    # Initialize the number of clusters to 2
+    num_clusters = 2
+    
+    # Loop until the maximum number of clusters is reached
+    while num_clusters <= n_clusters:
+        # Fit the KMeans model
+        kmeans.fit(numeric_cols)
+        
+        # Predict the cluster labels for each sample
         labels = kmeans.predict(numeric_cols)
         
-        # Compute the silhouette score for the current batch
+        # Compute the silhouette score for the current number of clusters
         silhouette_avg = silhouette_score(numeric_cols, labels)
         
-        # Update the best silhouette score if the current score is higher
-        if silhouette_avg > best_silhouette_score:
-            best_silhouette_score = silhouette_avg
-    
-    # Initialize the dataset with the first batch
-    dataset = dataset_iterator.next()
-    
-    # Loop over the batches of the dataset again to compute the final cluster labels
-    for dataset_batch in dataset_iterator:
-        # Extract the numeric columns from the current batch
-        numeric_cols = dataset_batch.select_dtypes(include='number')
+        # Append the silhouette score to the list
+        silhouette_scores.append(silhouette_avg)
         
-        # Predict the cluster labels for the current batch
-        labels = kmeans.predict(numeric_cols)
+        # Increment the number of clusters
+        num_clusters += 1
         
-        # Add the cluster labels to the dataset
-        dataset.loc[dataset_batch.index, 'cluster'] = labels
-
+    # Find the optimal number of clusters with the highest silhouette score
+    best_num_clusters = np.argmax(silhouette_scores) + 2  # +2 because we started from 2 clusters
+    
+    # Fit the KMeans model with the optimal number of clusters
+    kmeans = MiniBatchKMeans(n_clusters=best_num_clusters, batch_size=batch_size, init_size=init_size, random_state=42)
+    kmeans.fit(numeric_cols)
+    
+    # Predict the cluster labels for each sample
+    labels = kmeans.predict(numeric_cols)
+    
+    # Add the cluster labels to the original dataset
+    dataset['cluster'] = labels
+    
+    # Plot the silhouette scores for each sample
+    silhouette_values = silhouette_samples(numeric_cols, labels)
+    plt.figure(figsize=(10, 6))
+    plt.bar(range(len(labels)), silhouette_values)
+    plt.title(f"Silhouette plot for {best_num_clusters} clusters")
+    plt.xlabel("Sample index")
+    plt.ylabel("Silhouette value")
+    plt.show()
+    
     return dataset
