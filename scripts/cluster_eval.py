@@ -8,7 +8,7 @@ import data_loader
 
 
 
-def elbow_method(data, max_clusters=10):
+def elbow_method(kmeans, data, max_clusters=10):
     """
     Applies the elbow method to determine the optimal number of clusters for KMeans.
 
@@ -24,17 +24,17 @@ def elbow_method(data, max_clusters=10):
     are closer to the "center" of the cluster. The process is similar to the minimizing of the loss function.
     """
     wcss = []
-    for i in range(1, max_clusters+1):
-        kmeans = KMeans(n_clusters=i, n_init=10, random_state=0)
+    for i in range(1, max_clusters + 1):
+        kmeans.n_clusters = i
         kmeans.fit(data)
         wcss.append(kmeans.inertia_)
-    plt.plot(range(1, max_clusters+1), wcss)
+    plt.plot(range(1, max_clusters + 1), wcss)
     plt.title('Elbow Method')
     plt.xlabel('Number of Clusters')
     plt.ylabel('WCSS')
     plt.show()
 
-def silhouette_analysis(data, max_clusters=10):
+def silhouette_analysis(kmeans, data, max_clusters=10):
     """
     Applies the Silhouette analysis to determine the optimal number of clusters for KMeans.
 
@@ -55,11 +55,11 @@ def silhouette_analysis(data, max_clusters=10):
     Below 0.5 is considered to be a weak indication of separation of clusters
     """
     silhouette_scores = []
-    for i in range(2, max_clusters+1):
-        kmeans = KMeans(n_clusters=i, n_init=10, random_state=0)
+    for i in range(2, max_clusters + 1):
+        kmeans.n_clusters = i
         kmeans.fit(data)
         silhouette_scores.append(silhouette_score(data, kmeans.labels_))
-    plt.plot(range(2, max_clusters+1), silhouette_scores)
+    plt.plot(range(2, max_clusters + 1), silhouette_scores)
     plt.title('Silhouette Analysis')
     plt.xlabel('Number of Clusters')
     plt.ylabel('Silhouette Score')
@@ -98,7 +98,7 @@ def plot_all_clusters(cluster_centroids, column_names, title='Radar Chart - All 
         plot_radar_chart(ax, centroid, column_names, i + 1, colors[i % len(colors)])
 
     ax.set_title(title, size=20, color='black', y=1.05)
-    ax.legend(loc='upper right', bbox_to_anchor=(1.2, 1.1))
+    ax.legend(loc='upper right', bbox_to_anchor=(1.5, 1))
     plt.show()
 
 
@@ -116,14 +116,15 @@ def test():
     scaler = StandardScaler()
     data_scaled = scaler.fit_transform(df)
 
+    kmeans = KMeans(n_clusters=3, n_init=10, random_state=0)
+
     # Apply the elbow method
-    elbow_method(data_scaled, 20)
+    elbow_method(kmeans, data_scaled, 30)
 
     # Apply the Silhouette analysis
-    silhouette_analysis(data_scaled, 20)
+    silhouette_analysis(kmeans, data_scaled, 30)
 
-    # Calculate the Silhouette score for a given clustering
-    kmeans = KMeans(n_clusters=3, n_init=10, random_state=0)
+    kmeans.n_clusters = 3
     kmeans.fit(data_scaled)
     cluster_centroids = kmeans.cluster_centers_
     labels = kmeans.labels_
