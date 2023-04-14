@@ -93,12 +93,12 @@ def plot_radar_chart(ax, data, column_names, cluster_number, color):
 def plot_all_clusters(cluster_centroids, column_names, title='Radar Chart - All Clusters'):
     colors = ['blue', 'green', 'red', 'purple', 'orange', 'cyan']
 
-    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(10, 6), subplot_kw=dict(polar=True))
     for i, centroid in enumerate(cluster_centroids):
         plot_radar_chart(ax, centroid, column_names, i + 1, colors[i % len(colors)])
 
-    ax.set_title(title, size=20, color='black', y=1.1)
-    ax.legend(loc='upper right', bbox_to_anchor=(1.2, 1.2))
+    ax.set_title(title, size=20, color='black', y=1.05)
+    ax.legend(loc='upper right', bbox_to_anchor=(1.2, 1.1))
     plt.show()
 
 
