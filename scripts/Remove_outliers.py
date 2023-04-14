@@ -1,4 +1,9 @@
-"""
+
+import numpy as np
+
+
+def remove_outliers(dataset,listofcolumns,n):
+    """
 This function takes a dataframe or a numpy array and removes outliers 
     using the median absolute deviation (MAD) method.
     
@@ -11,11 +16,6 @@ This function takes a dataframe or a numpy array and removes outliers
     Returns:
         A dataframe or numpy array without the outliers.
     """
-import numpy as np
-
-
-def remove_outliers(dataset,listofcolumns,n):
-    
     #Calculate median of the data along each column
     median = np.median(dataset[listofcolumns], axis=0)
     
