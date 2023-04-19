@@ -3,6 +3,8 @@
 """
 import yaml
 import pandas as pd
+import data_cleaning
+import data_types
 
 def read_config(file_path='config.yaml') -> None:
     """Reads configuration file
@@ -35,5 +37,10 @@ def get_data(file_path=None, nrows=None, verbose=False) -> pd.DataFrame:
                        nrows=nrows, low_memory=False)
 
 if __name__ == "__main__":
-    data = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=50)
-    print(f"data set shape is {data.shape}") 
+    data = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=100)
+    print(f"data set shape is {data.shape}")
+    df_cleaned = todo.main(data)
+    print(data.shape)
+    print(df_cleaned.shape)
+    data_types.main(df_cleaned)
+
