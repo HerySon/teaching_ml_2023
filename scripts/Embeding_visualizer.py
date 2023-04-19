@@ -23,11 +23,11 @@ class Embeding_visualizer():
 
 
     def GenerateToken(self, text: Union[str, list]) -> list:
-        """Convert text to embeding vector
+        """Convert text to tokens
             args : 
             text (str or list)
                 The text or list of word to convert
-            return : embeding vector (list) or None
+            return : tokens (list) or None
         """
         if (not isinstance(text, str) and not isinstance(text, list)) or text is None:
             raise TypeError("text must be a str or a list")
@@ -47,23 +47,26 @@ class Embeding_visualizer():
         return tokens
 
 
-    def trainModel(self, tokens: list) -> Union[list, None]:
+    def trainModel(self, tokens: list, **kwargs) -> Union[list, None]:
         """Train the model
             args :
                 tokens (list) :
                     The list of tokens
+                **kwargs :
+                    The arguments of the Word2Vec model
             return :
                 list of the words in the model
         """
         if not isinstance(tokens, list):
             raise TypeError("tokens must be a list")
         # Train the model
-        self.model = Word2Vec(sentences=tokens, vector_size=100, window=5, min_count=1, workers=4)
+        self.model = Word2Vec(sentences=tokens, vector_size=100, window=5, min_count=1, workers=4, **kwargs)
         self.model.train(tokens, total_examples=len(tokens), epochs=10)
         return self.model.wv.key_to_index
 
 
-    def getMostSimilarWords(self, word: str, topn: int = 10, similar : bool = True, return_only_world : bool = True) -> list:
+    def getMostSimilarWords(self, word: str, topn: int = 10, similar : bool = True, 
+                            return_only_word : bool = True) -> list:
         """Get the most similar words
             args :
                 word (str) :
@@ -72,6 +75,10 @@ class Embeding_visualizer():
                     The number of words to return
                 similar (bool) :
                     If True, return the most similar words
+                    If False, return the most dissimilar words
+                return_only_word (bool) :
+                    If True, return only the words
+                    If False, return the words and the score
             return :
                 list of the most similar words
         """
@@ -88,8 +95,8 @@ class Embeding_visualizer():
             result = self.model.wv.most_similar(word, topn=topn)
         else:
             result = self.model.wv.most_similar(negative=[word], topn=topn)
-        if return_only_world:
-            return [word[0] for word in result]
+        if return_only_word:
+            return [return_word[0] for return_word in result]
         else:
             return result
 
@@ -110,7 +117,9 @@ class Embeding_visualizer():
         return self.model.wv[word]
     
 
-    def get_tsne_transform(self, datas : list, perplexity: float = 40, n_components: int = 2, init: str = "pca", n_iter: int = 2500):
+    def get_tsne_transform(self, datas : list, perplexity: float = 40, 
+                           n_components: int = 2, init: str = "pca", 
+                           n_iter: int = 2500):
         """Creates and TSNE model and plots it
             args :
                 datas (pd.DataFrame) :
@@ -150,15 +159,15 @@ class Embeding_visualizer():
             raise TypeError("n_iter must be an int")
 
         # Create a tsne model and plot it
-        labels = []
-        tokens = []
+        word_vector = []
         # Add all tokens to the list
         for word in datas:
-            tokens.append(self.model.wv[word])
+            word_vector.append(self.model.wv[word])
         # Create a tsne model
-        tsne_model = TSNE(perplexity=perplexity, n_components=n_components, init=init, n_iter=n_iter, random_state=23)
+        tsne_model = TSNE(perplexity=perplexity, n_components=n_components, 
+                          init=init, n_iter=n_iter, random_state=23)
         # Calculate the new values
-        new_values = tsne_model.fit_transform(pd.DataFrame(tokens).values)
+        new_values = tsne_model.fit_transform(pd.DataFrame(word_vector).values)
 
         return tsne_model, new_values
 
@@ -175,10 +184,8 @@ class Embeding_visualizer():
 
         # Create a tsne model and plot it
         labels = []
-        tokens = []
         # Add all tokens to the list
         for word in self.model.wv.index_to_key:
-            tokens.append(self.model.wv[word])
             labels.append(word)
 
         # Keep a track of x y for the annotation
