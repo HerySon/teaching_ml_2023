@@ -29,7 +29,7 @@ This function takes a dataframe or a numpy array and removes outliers
     threshold = n * mad
     
     # Mask for identifying outlier values
-    masked = np.abs(dataset[listofcolumns] - median) > threshold
+    masked = np.abs(dataset[listofcolumns]) > threshold
     
     # Remove rows containing outliers
     data_cleaned = dataset[~masked.any(axis=1)]
