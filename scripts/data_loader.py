@@ -35,11 +35,18 @@ def get_data(file_path=None, nrows=None):
 
 
 if __name__ == "__main__":
-    data = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=50)
+    data = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=200)
     print(f"data set shape is {data.shape}")
-    data_cleaning.print_columns(data)
+    #data_cleaning.print_columns(data)
     # Pass the column names as a list
-    data_cleaning.distplot2x2(data, ['energy_100g','fat_100g','saturated-fat_100g','trans-fat_100g'])
+    #data_cleaning.distplot2x2(data, ['energy_100g','fat_100g','saturated-fat_100g','trans-fat_100g'])
+    #data_cleaning.print_unique_values(data["countries"])
+    #print(data_cleaning.parse_countries(data["countries"]))
+
+    df = data_cleaning.create_test_dataframe()
+    print(df)
+    new_dataset = data_cleaning.replace_country_name_with_code(df, "countries")
+    print(new_dataset)
 
 
 
