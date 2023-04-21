@@ -20,25 +20,25 @@ def select_features(filepath, threshold, chunksize):
     """
 
     # Get the number of initial columns
-    num_cols = len(pd.read_csv(filepath, sep='\t',header="infer" ,nrows=1).columns)
+    num_cols = len(pd.read_csv(filepath,header="infer" ,nrows=1).columns)
     print(f"Number of initial columns: {num_cols}")
 
     # Initialize a dictionary to store the overall missing values for each column
-    missing_counts = {col: 0 for col in pd.read_csv(filepath,sep='\t',header="infer" , nrows=1).columns}
+    missing_counts = {col: 0 for col in pd.read_csv(filepath,header="infer" , nrows=1).columns}
 
     datalenght= 0
     # Iterate over the dataset in chunks to reduce memory usage
     for chunk in pd.read_csv(filepath, chunksize=chunksize):
         # Calculate the percentage of missing values for each column in the current chunk
-        missing_percentage = chunk.isnull().sum() / len(chunk) * 100
-        datalenght =+ len(chunk)
-
+        missing = chunk.isnull().sum()
+        datalenght += len(chunk)
+        
         # Update the overall missing values for each column by adding by overwriting at each iteration
         for col in missing_counts:
-            missing_counts[col] += missing_percentage[col]
+            missing_counts[col] += missing[col]
 
     # Calculate the overall percentage of missing values for each column
-    missing_percentages = pd.Series(missing_counts) / datalenght * 100
+    missing_percentages = pd.Series(missing_counts) / datalenght *100
 
     # Select the columns that have less than the threshold of missing values
     selected_columns = list(missing_percentages[missing_percentages <= threshold].index)
