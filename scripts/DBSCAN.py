@@ -1,139 +1,35 @@
-"""
-DBSCAN: Density-Based Spatial Clustering of Applications with Noise
-"""
+import pandas as pd
+from sklearn.cluster import DBSCAN
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
 
-import warnings
-from numbers import Integral, Real
+def train_and_optimize_DBSCAN(data, feature_cols, eps_min=0.1, eps_max=1.0, eps_step=0.1, min_samples_min=2, min_samples_max=10, min_samples_step=1):
+    # Preprocess data using standardization
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(data)
 
-import numpy as np
-from scipy import sparse
+    # Initialize variables to store optimal hyperparameters and metrics
+    best_eps = 0
+    best_min_samples = 0
+    best_silhouette_score = -1
 
-from ..metrics.pairwise import _VALID_METRICS
-from ..base import BaseEstimator, ClusterMixin
-from ..utils.validation import _check_sample_weight
-from ..utils._param_validation import Interval, StrOptions
-from ..neighbors import NearestNeighbors
-from ._dbscan_inner import dbscan_inner
-def __init__(
-        self,
-        eps=0.5,
-        *,
-        min_samples=5,
-        metric="euclidean",
-        metric_params=None,
-        algorithm="auto",
-        leaf_size=30,
-        p=None,
-        n_jobs=None,
-    ):
-        self.eps = eps
-        self.min_samples = min_samples
-        self.metric = metric
-        self.metric_params = metric_params
-        self.algorithm = algorithm
-        self.leaf_size = leaf_size
-        self.p = p
-        self.n_jobs = n_jobs
+    # Perform grid search to find optimal hyperparameters
+    for eps in np.arange(eps_min, eps_max + eps_step, eps_step):
+        for min_samples in range(min_samples_min, min_samples_max + min_samples_step, min_samples_step):
+            dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+            y_pred = dbscan.fit_predict(X_scaled)
+            if len(set(y_pred)) > 1:
+                # Compute Silhouette Score for non-trivial solutions
+                silhouette = silhouette_score(X_scaled, y_pred)
+                if silhouette > best_silhouette_score:
+                    # Update best hyperparameters and Silhouette Score
+                    best_eps = eps
+                    best_min_samples = min_samples
+                    best_silhouette_score = silhouette
 
-    def fit(self, X, y=None, sample_weight=None):
-        """Perform DBSCAN clustering from features, or distance matrix.
-        Parameters
-        ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features), or \
-            (n_samples, n_samples)
-            Training instances to cluster, or distances between instances if
-            ``metric='precomputed'``. If a sparse matrix is provided, it will
-            be converted into a sparse ``csr_matrix``.
-        y : Ignored
-            Not used, present here for API consistency by convention.
-        sample_weight : array-like of shape (n_samples,), default=None
-            Weight of each sample, such that a sample with a weight of at least
-            ``min_samples`` is by itself a core sample; a sample with a
-            negative weight may inhibit its eps-neighbor from being core.
-            Note that weights are absolute, and default to 1.
-        Returns
-        -------
-        self : object
-            Returns a fitted instance of self.
-        """
-        self._validate_params()
+    # Train DBSCAN model using best hyperparameters
+    dbscan = DBSCAN(eps=best_eps, min_samples=best_min_samples)
+    y_pred = dbscan.fit_predict(X_scaled)
 
-        X = self._validate_data(X, accept_sparse="csr")
-
-        if sample_weight is not None:
-            sample_weight = _check_sample_weight(sample_weight, X)
-
-        # Calculate neighborhood for all samples. This leaves the original
-        # point in, which needs to be considered later (i.e. point i is in the
-        # neighborhood of point i. While True, its useless information)
-        if self.metric == "precomputed" and sparse.issparse(X):
-            # set the diagonal to explicit values, as a point is its own
-            # neighbor
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", sparse.SparseEfficiencyWarning)
-                X.setdiag(X.diagonal())  # XXX: modifies X's internals in-place
-
-        neighbors_model = NearestNeighbors(
-            radius=self.eps,
-            algorithm=self.algorithm,
-            leaf_size=self.leaf_size,
-            metric=self.metric,
-            metric_params=self.metric_params,
-            p=self.p,
-            n_jobs=self.n_jobs,
-        )
-        neighbors_model.fit(X)
-        # This has worst case O(n^2) memory complexity
-        neighborhoods = neighbors_model.radius_neighbors(X, return_distance=False)
-
-        if sample_weight is None:
-            n_neighbors = np.array([len(neighbors) for neighbors in neighborhoods])
-        else:
-            n_neighbors = np.array(
-                [np.sum(sample_weight[neighbors]) for neighbors in neighborhoods]
-            )
-
-        # Initially, all samples are noise.
-        labels = np.full(X.shape[0], -1, dtype=np.intp)
-
-        # A list of all core samples found.
-        core_samples = np.asarray(n_neighbors >= self.min_samples, dtype=np.uint8)
-        dbscan_inner(core_samples, neighborhoods, labels)
-
-        self.core_sample_indices_ = np.where(core_samples)[0]
-        self.labels_ = labels
-
-        if len(self.core_sample_indices_):
-            # fix for scipy sparse indexing issue
-            self.components_ = X[self.core_sample_indices_].copy()
-        else:
-            # no core samples
-            self.components_ = np.empty((0, X.shape[1]))
-        return self
-
-    def fit_predict(self, X, y=None, sample_weight=None):
-        """Compute clusters from a data or distance matrix and predict labels.
-        Parameters
-        ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features), or \
-            (n_samples, n_samples)
-            Training instances to cluster, or distances between instances if
-            ``metric='precomputed'``. If a sparse matrix is provided, it will
-            be converted into a sparse ``csr_matrix``.
-        y : Ignored
-            Not used, present here for API consistency by convention.
-        sample_weight : array-like of shape (n_samples,), default=None
-            Weight of each sample, such that a sample with a weight of at least
-            ``min_samples`` is by itself a core sample; a sample with a
-            negative weight may inhibit its eps-neighbor from being core.
-            Note that weights are absolute, and default to 1.
-        Returns
-        -------
-        labels : ndarray of shape (n_samples,)
-            Cluster labels. Noisy samples are given the label -1.
-        """
-        self.fit(X, sample_weight=sample_weight)
-        return self.labels_
-
-    def _more_tags(self):
-        return {"pairwise": self.metric == "precomputed"
+    # Return predicted cluster labels and best hyperparameters
+    return y_pred, {'eps': best_eps, 'min_samples': best_min_samples}
