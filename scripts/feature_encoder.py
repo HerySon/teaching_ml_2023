@@ -61,7 +61,6 @@ def encoding_vars(dataset, ohe = True, big_memory = False, cols_to_split_but_big
       oe = HashingEncoder()
     oe.fit(dataset[ordinal_cols])
     dataset[ordinal_cols] = oe.transform(dataset[ordinal_cols])
-    dataset.drop(ordinal_cols, axis=1, inplace=True)
     # Dummies (OneHotEncoding)
     dataset = dataset.join(pd.get_dummies(dataset[dummies_cols]))
     dataset.drop(dummies_cols, axis=1, inplace=True)
