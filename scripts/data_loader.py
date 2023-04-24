@@ -35,5 +35,5 @@ def get_data(file_path=None, nrows=None, verbose=False) -> pd.DataFrame:
                        nrows=nrows, low_memory=False)
 
 if __name__ == "__main__":
-    data = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=50)
+    data = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=1000)
     print(f"data set shape is {data.shape}") 
