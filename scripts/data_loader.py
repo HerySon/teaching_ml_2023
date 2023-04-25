@@ -3,6 +3,7 @@
 """
 import yaml
 import pandas as pd
+import data_cleaning
 
 def read_config(file_path='config.yaml') -> None:
     """Reads configuration file
@@ -33,6 +34,8 @@ def get_data(file_path=None, nrows=None, verbose=False) -> pd.DataFrame:
              
     return pd.read_csv(file_path,sep="\t", encoding="utf-8",
                        nrows=nrows, low_memory=False)
+
+
 
 if __name__ == "__main__":
     data = get_data(file_path = "../data/en.openfoodfacts.org.products.csv", nrows=1000)

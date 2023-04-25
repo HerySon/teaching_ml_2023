@@ -5,14 +5,15 @@ wheel>=0.29
 
 # data science
 numpy
+scipy > 1.24
 pandas >=2.0.0
 scikit-learn >=1.2.2
-seaborn
-plotly
-scipy > 1.24
+pycountry
 
 # Visualisation
 wordcloud
+plotly
+seaborn
 
 # nlp
 #gensim
