@@ -12,12 +12,10 @@ class OutliersManaging:
 
     def __init__(
                     self,
-                    df     = None,
-                    method = 'mean'
+                    df = None
                 ):
 
-        self.df     = df
-        self.method = method
+        self.df = df
 
     def get_features_endswith(self, endswith, ft_exclude=[]):
         """Get features endswith method
@@ -40,17 +38,17 @@ class OutliersManaging:
         df_endswith = self.df[res]
         return df_endswith
     
-    def get_feature_info(self, feature):
+    def get_feature_info(self, feature, method='mean'):
         """Get features information
         Args:
-            feature (Dataframe) : feature to extract information
+            feature (pandas Series) : feature to extract information
         Returns:
-            info (DataFrame): return information
+            info (string|integer): return information
         @Author: Thomas PAYAN
         """
         info = None
 
-        match self.method:
+        match method:
             case 'mean':
                 print('mean')
                 info = feature.mean()
@@ -78,7 +76,7 @@ class OutliersManaging:
             - nutrition-score-uk_100g : uk nutrition score
 
         Args:
-            ft_exclude (array) : list of excluded features
+            ft_exclude (list) : list of excluded features
         Returns:
             df (DataFrame): return preprocessed dataframe
         @Author: Thomas PAYAN
@@ -108,8 +106,15 @@ class OutliersManaging:
             df (DataFrame): return managed dataframe
         @Author: Thomas PAYAN
         """
-        ft_exclude = ['energy-kj_100g','energy-kcal_100g','ph_100g','carbon-footprint_100g','nutrition-score-fr_100g','nutrition-score-uk_100g']
-        self.correct_features_100g(ft_exclude)
+        ft_exclude = [
+                        'energy-kj_100g',
+                        'energy-kcal_100g',
+                        'ph_100g',
+                        'carbon-footprint_100g',
+                        'nutrition-score-fr_100g',
+                        'nutrition-score-uk_100g'
+                    ]
+        self.df = self.correct_features_100g(ft_exclude)
     
         return self.df
         
