@@ -1,76 +1,81 @@
-def kmeans(dataset, k_min=2, k_max=10, elbow_choice='inertias', inp_algo='lloyd', inp_init='k-means++', inp_n_init=10):
+import pandas as pd
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
+    
+def train_and_optimize_kmeans(data, feature_cols, num_clusters=3, max_clusters=10, use_pca=True, use_scaler=True, **kwargs):
     """
-     This function will fit a KMeans model. You pass the OpenFoodFact dataset as entry and you get the fitted model at the end.
-    You can precise the number of cluster expected.
-
-    Args :
-        dataset -- the dataset who contains OpenFoodFact data (required)
+    ----------------------------------------------------------
+    Goal : 
+    ----------------------------------------------------------
+    Trains and optimizes K-means on the OpenFoodFacts dataset.
+    ---------------------------------------------------------
+    Args:
+    -----------------------------------------------------------
+        data: OpenFoodFacts dataframe.
+        feature_cols (list): A list of column names for the features to be used for training.
+        num_clusters (int): The number of clusters to use for the initial K-means training.
+                            Default is 3.
+        max_clusters (int): The maximum number of clusters to try during the optimization.
+                            Default is 10.
+        use_pca (bool): Whether to use PCA for dimensionality reduction. Default is True.
+        use_scaler (bool): Whether to use StandardScaler for data normalization. Default is True.
+        **kwargs : additional parameters for KMeans model
         
-        k_min -- number of cluster minimum -- Default = 2 (int)
-        
-        k_max -- number of cluster maximum -- Default = 10 (int)
-        
-        elbow_choice -- whether to use inertias or distortions for elbow method.
-        Possible values are 'inertias' and 'distortions'. -- Default = 'inertias'
-        
-        inp_algo -- K-means algorithm to use. Possible values are ['lloyd', 'elkan', 'auto', 'full'] -- Default = 'lloyd'
-        
-        inp_init -- Method for initialization of centroids. Possible values are ["k-means++", "random"] -- Default = 'k-means++'
-        
-        inp_n_init -- Number of times the k-means algorithm is run with different centroid seeds. 
-        Possible values are "auto" or an integer. -- Default = 10 (int)
-
-    Returns :
-        Fitted model of KMeans.
+    -------------------------------------------------------------
+    Returns:
+    --------------------------------------------------------------
+        The optimal number of clusters, as determined by the silhouette score.
+    ------------------------------------------------------------------------
     """
-    import pandas as pd
-    import numpy as np
-    from numpy.testing import assert_equal
-    from sklearn.cluster import KMeans
-    
-    # Verifying if dataset input is a pd.DataFrame().
-    assert_equal(type(dataset), type(pd.DataFrame()), err_msg='Input is not Pandas Dataframe.', verbose=True)
-    assert elbow_choice == 'inertias' or elbow_choice == 'distortions', 'You should choose between "inertias" or "distortions" values for elbow_choice.'
-    for i in dataset.columns:
-        assert dataset[i].dtype in [type(int()), type(float()), np.int64().dtype, np.int32().dtype, np.float64().dtype,
-                                    np.float32().dtype], f'{i} column of the dataset is not numeric type. Please ' \
-                                                         f'convert columns to numeric type or input only a part of ' \
-                                                         f'the dataset with numeric columns only.'
-    # Verifying if the number of missing values in the dataset is 0. (no missing value)
-    assert_equal(dataset.isna().sum().sum(), 0,
-                 err_msg=f'There is {dataset.isna().sum().sum()} NaN values in dataset, please preprocess them before '
-                         f'trying to fit KMeans.')
-    
-    distortions = []
-    inertias = []
-    mapping1 = {}
-    mapping2 = {}
-    K = range(k_min, k_max)
 
-    for z in K:
-        # Building and fitting the model
-        kmeanModel = KMeans(n_clusters=z).fit(X)
-        kmeanModel.fit(X)
 
-        distortions.append(sum(np.min(cdist(X, kmeanModel.cluster_centers_,
-                                            'euclidean'), axis=1)) / X.shape[0])
-        inertias.append(kmeanModel.inertia_)
-
-        mapping1[k] = sum(np.min(cdist(X, kmeanModel.cluster_centers_,
-                                       'euclidean'), axis=1)) / X.shape[0]
-        mapping2[k] = kmeanModel.inertia_
     
-    if elbow_choice == "inertias":
-        choice = inertias
-    elif elbow_choice == "distortions":
-        choice = distortions
-    plt.plot(K, choice, 'bx-')
-    plt.xlabel('Values of K')
-    plt.ylabel(f'{elbow_choice')
-    plt.title(f'The Elbow Method using {elbow_choice}')
-    plt.show()
+    # Select the feature columns
+    X = data[feature_cols].values
     
-    k = input("Now choose a value for k :")
+    # Apply dimensionality reduction if needed
+    if use_pca:
+        pca = PCA(n_components=2)
+        X = pca.fit_transform(X)
     
-    model = KMeans(n_clusters=k, random_state=13, algorithm=inp_algo, init=inp_init, n_init=inp_n_init)
-    return model.fit(dataset)
+    # Normalize the data if needed
+    if use_scaler:
+        scaler = StandardScaler()
+        X = scaler.fit_transform(X)
+    
+    # Train the initial K-means model
+    kmeans = KMeans(n_clusters=num_clusters, random_state=42, **kwargs)
+    kmeans.fit(X)
+    
+    # Evaluate the initial model
+    inertia = kmeans.inertia_
+    silhouette = silhouette_score(X, kmeans.labels_)
+    print("Initial model - Inertia: {}, Silhouette Score: {}".format(inertia, silhouette))
+    
+    # Try different numbers of clusters and evaluate them
+    scores = []
+    for i in range(2, max_clusters+1):
+        kmeans = KMeans(n_clusters=i, random_state=42, **kwargs)
+        kmeans.fit(X)
+        score = silhouette_score(X, kmeans.labels_)
+        scores.append(score)
+        print("K-means with {} clusters - Silhouette Score: {}".format(i, score))
+    
+    # Find the optimal number of clusters
+    optimal_clusters = np.argmax(scores) + 2
+    print("Optimal number of clusters: {}".format(optimal_clusters))
+    
+    return optimal_clusters
+  
+if __name__ == "__main__":  
+    
+    # Example usage
+    data = pd.DataFrame({'col1': [1, 2, 3, 4, 5], 'col2': [6, 7, 8, 9, 10], 'col3': [11, 12, 13, 14, 15]})
+    feature_cols = ['col1', 'col2', 'col3']
+    num_clusters = 3
+    max_clusters = 10
+    kmeans_kwargs = {'init': 'random', 'n_init': 10, 'max_iter': 300, 'tol': 1e-04}
+    optimal_clusters = train_and_optimize_kmeans(data, feature_cols, num_clusters, max_clusters, True, True, **kmeans_kwargs)
