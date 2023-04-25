@@ -5,8 +5,8 @@ class Filtering:
     """Class to filtering pandas dataframe
     Args:
         df (DataFrame): pandas dataframe
-        endswith (array): list of features ending with
-        wendswith (array): list (invert) of features ending with
+        endswith (list): list of features ending with
+        wendswith (list): list (invert) of features ending with
     Returns:
         df (DataFrame): return filtered pandas dataframe
     @Author: Thomas PAYAN
@@ -46,9 +46,10 @@ class Filtering:
         return df_cat
     
     def get_features_endswith(self, endswith, invert=False):
-        """Get features endswith method
+        """Get features endswith method : 
+            User can delete features that do not match selection afterwards
         Args:
-            endswith (array) : list of features ending with
+            endswith (list) : list of features ending with
             invert (boolean) : to get features without the end of tag
         Returns:
             df_endswith (DataFrame): return selected features pandas dataframe
@@ -60,14 +61,15 @@ class Filtering:
         
         for feature in ft_list.tolist():
             for end in endswith:
-                if feature.endswith(end):
-                    feature_wendswith = feature.removesuffix(end)
-                    if invert:
-                        if feature_wendswith in ft_list:
-                            ft_endswith.append(feature_wendswith)
+                if feature.endswith(end): # Feature name ends with selected item
+                    feature_wendswith = feature.removesuffix(end) # Feature name without suffix
+                    if invert: # If invert is True : invert the original selection
+                        if feature_wendswith in ft_list: # Feature name exists into Dataframe colums list
+                            ft_endswith.append(feature_wendswith) # Push feature name into list
                     else:
-                        ft_endswith.append(feature)
-        df_endswith = self.df[ft_endswith]
+                        ft_endswith.append(feature) # Push feature name into list
+
+        df_endswith = self.df[ft_endswith] 
         return df_endswith
     
     def drop_features(self, features):
