@@ -1,16 +1,19 @@
 # packaging
 pip>=9
 setuptools>=26
-twine
 wheel>=0.29
 
 # data science
 numpy
-pandas
+scipy > 1.24
+pandas >=2.0.0
 scikit-learn >=1.2.2
-seaborn
-plotly
 pycountry
+
+# Visualisation
+wordcloud
+plotly
+seaborn
 
 # nlp
 #gensim
@@ -41,3 +44,7 @@ joblib
 pyyaml>=6.0
 # memoized-property
 # termcolor
+
+wordcloud
+multidict
+Unidecode
