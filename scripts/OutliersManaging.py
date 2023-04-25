@@ -1,5 +1,7 @@
 from data_loader import *
 import pandas as pd
+import numpy as np
+from collections import Counter
 
 class OutliersManaging:
     """Class to managing outliers
@@ -99,6 +101,46 @@ class OutliersManaging:
                 print("NaN values")
 
         return self.df
+    
+    def tukey_outliers(self, features=[], number_outliers=2):
+        """Takes a dataframe df of features and returns a list of the indices
+            corresponding to the observations containing more than n outliers according
+            to the Tukey method
+
+        Args:
+            features (list) : list of features
+            number_outliers (integer) : minimum outliers number
+        Returns:
+            multiple_outliers (list): return indices list
+        @Author: Thomas PAYAN
+        """
+        outlier_indices = []
+
+        first_quartile = 25 # 1st quartile (25%)
+        third_quartile = 75 # 3rd quartile (75%)
+        
+        # Iterate over features
+        for col in features:
+            
+            Q1 = np.percentile(self.df[col], first_quartile)
+            Q3 = np.percentile(self.df[col], third_quartile)
+            # Interquartile range (IQR)
+            IQR = Q3 - Q1
+            
+            # Outlier step
+            outlier_step = 1.5 * IQR
+            
+            # Determine a list of indices of outliers for feature col
+            outlier_list_col = self.df.loc[(self.df[col] < Q1 - outlier_step) | (self.df[col] > Q3 + outlier_step ), col]
+            
+            # Append the found outlier indices for col to the list of outlier indices 
+            outlier_indices.extend(outlier_list_col)
+            
+        # Select observations containing more than n outliers
+        outlier_indices   = Counter(outlier_indices)        
+        multiple_outliers = list(x for x, y in outlier_indices.items() if y > number_outliers)
+        
+        return multiple_outliers   
         
     def outliers_managing(self):
         """Managing outliers in pandas dataframe
@@ -115,6 +157,12 @@ class OutliersManaging:
                         'nutrition-score-uk_100g'
                     ]
         self.df = self.correct_features_100g(ft_exclude)
+
+        df_100g = self.get_features_endswith("_100g", ft_exclude) # Select features list
+        tukey_outliers = self.tukey_outliers(df_100g.columns.tolist()) # Detect outliers
+
+        self.df.loc[tukey_outliers] # Show the ouliers rows
+        self.df.drop(tukey_outliers, inplace=True) # Drop outliers
     
         return self.df
         
