@@ -11,6 +11,9 @@ seaborn
 plotly
 scipy > 1.24
 
+# Visualisation
+wordcloud
+
 # nlp
 #gensim
 #spacy
