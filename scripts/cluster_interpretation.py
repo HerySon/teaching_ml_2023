@@ -161,14 +161,9 @@ if __name__ == "__main__":
     data = data_loader.get_data("..\data\en.openfoodfacts.org.products.csv", 100)
 
     numeric_data = select_numeric_columns(data)
-    print("Before imputation:")
-    print(numeric_data.head())
 
     imputed_data = impute_missing_values(numeric_data)
     imputed_data = imputed_data.dropna(axis=1, how='all')
-
-    print("After imputation:")
-    print(imputed_data.head())
 
     scaler = MinMaxScaler()
     scaled_data = scaler.fit_transform(imputed_data)
