@@ -7,8 +7,6 @@ from sklearn.cluster import KMeans
 from wordcloud import WordCloud
 from sklearn.impute import SimpleImputer
 import matplotlib.pyplot as plt
-import pprint
-
 
 
 def calculate_centroids(cluster_labels, data):
@@ -164,7 +162,7 @@ if __name__ == "__main__":
     """
     This script loads the dataset, preprocesses it by selecting numeric columns,
     imputing missing values, and scaling the data. Then, it applies KMeans clustering
-    to find 3 clusters and summarizes their characteristics.
+    to find 4 clusters and summarizes their characteristics.
     """
     data = data_loader.get_data("..\data\en.openfoodfacts.org.products.csv", 100)
     #Should drop columns that are not meaningful
@@ -175,7 +173,7 @@ if __name__ == "__main__":
 
     scaler = MinMaxScaler()
     scaled_data = scaler.fit_transform(imputed_data)
-    kmeans = KMeans(n_clusters=3)
+    kmeans = KMeans(n_clusters=4)
     cluster_labels = kmeans.fit_predict(scaled_data)
 
     centroids = calculate_centroids(cluster_labels, imputed_data)
