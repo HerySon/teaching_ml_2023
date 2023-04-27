@@ -7,6 +7,7 @@ from sklearn.cluster import KMeans
 from wordcloud import WordCloud
 from sklearn.impute import SimpleImputer
 import matplotlib.pyplot as plt
+import pprint
 
 
 
@@ -134,6 +135,22 @@ def impute_missing_values(data):
 
     return imputed_data
 
+def display_centroids(centroids_df):
+    """
+    Display the centroids in a tabular format for better readability.
+
+    :param centroids_df: A DataFrame representing the centroids
+    """
+    # Transpose the DataFrame, so each column represents a cluster and each row a feature
+    centroids_df = centroids_df.T
+
+    # Reset the index and name the columns
+    centroids_df.reset_index(inplace=True, drop=True)
+    centroids_df.index.name = "Feature"
+    centroids_df.columns.name = "Cluster"
+
+    # Use the pretty-print library to display the DataFrame
+    pprint.pprint(centroids_df)
 
 if __name__ == "__main__":
     """
@@ -158,12 +175,13 @@ if __name__ == "__main__":
     kmeans = KMeans(n_clusters=3)
     cluster_labels = kmeans.fit_predict(scaled_data)
 
+    centroids = calculate_centroids(cluster_labels, imputed_data)
+    display_centroids(centroids)
+    #most_common_features = get_most_common_features(cluster_labels, imputed_data)
+    #summarize_clusters(cluster_labels, imputed_data, centroids, most_common_features)
+
     # Assuming the item names are stored in a column called "product_name"
     item_names = data["product_name"]
-
-    centroids = calculate_centroids(cluster_labels, imputed_data)
-    most_common_features = get_most_common_features(cluster_labels, imputed_data)
-    summarize_clusters(cluster_labels, imputed_data, centroids, most_common_features)
 
     # Call the generate_wordclouds function
     generate_wordclouds(cluster_labels, imputed_data, item_names)
