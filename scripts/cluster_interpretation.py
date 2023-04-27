@@ -1,12 +1,12 @@
 import numpy as np
 import pandas as pd
 import data_loader
-import yaml
 from collections import Counter
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.cluster import KMeans
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
+from wordcloud import WordCloud
+from sklearn.impute import SimpleImputer
+import matplotlib.pyplot as plt
 
 
 
@@ -93,7 +93,28 @@ def select_numeric_columns(data):
     return numeric_columns
 
 
-from sklearn.impute import SimpleImputer
+
+def generate_wordclouds(cluster_labels, data, item_names):
+    """Generates word clouds for each cluster based on item names.
+
+    Args:
+        cluster_labels (list): List of cluster labels for each data point.
+        data (pd.DataFrame): Dataframe containing the dataset.
+        item_names (pd.Series): Series containing item names.
+    """
+    unique_labels = np.unique(cluster_labels)
+
+    for label in unique_labels:
+        cluster_item_names = item_names[cluster_labels == label]
+        text = ' '.join(str(name) for name in cluster_item_names)  # Convert item names to strings before joining
+
+        wordcloud = WordCloud(background_color='white', max_words=100).generate(text)
+
+        plt.imshow(wordcloud, interpolation='bilinear')
+        plt.axis("off")
+        plt.title(f"Cluster {label} Word Cloud")
+        plt.show()
+
 
 
 def impute_missing_values(data):
@@ -137,6 +158,12 @@ if __name__ == "__main__":
     kmeans = KMeans(n_clusters=3)
     cluster_labels = kmeans.fit_predict(scaled_data)
 
+    # Assuming the item names are stored in a column called "product_name"
+    item_names = data["product_name"]
+
     centroids = calculate_centroids(cluster_labels, imputed_data)
     most_common_features = get_most_common_features(cluster_labels, imputed_data)
     summarize_clusters(cluster_labels, imputed_data, centroids, most_common_features)
+
+    # Call the generate_wordclouds function
+    generate_wordclouds(cluster_labels, imputed_data, item_names)

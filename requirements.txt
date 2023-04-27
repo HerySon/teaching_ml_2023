@@ -19,6 +19,7 @@ plotly
 #dash
 #dash_bootstrap_components
 #streamlir
+wordcloud
 
 # tests/linter
 black
