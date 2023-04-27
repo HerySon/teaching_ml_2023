@@ -141,16 +141,24 @@ def display_centroids(centroids_df):
 
     :param centroids_df: A DataFrame representing the centroids
     """
+    pd.set_option('display.float_format', '{:.3f}'.format)
+
     # Transpose the DataFrame, so each column represents a cluster and each row a feature
     centroids_df = centroids_df.T
 
-    # Reset the index and name the columns
-    centroids_df.reset_index(inplace=True, drop=True)
-    centroids_df.index.name = "Feature"
-    centroids_df.columns.name = "Cluster"
+    # Round the values to 2 decimal places
+    centroids_df = centroids_df.round(3)
 
-    # Use the pretty-print library to display the DataFrame
-    pprint.pprint(centroids_df)
+    # Reset the index, and name the index and columns
+    centroids_df.reset_index(inplace=True)
+    centroids_df.index.name = "Feature"
+    centroids_df.columns = ["Feature"] + [f"Cluster {i}" for i in range(len(centroids_df.columns) - 1)]
+
+    # Set the index to the feature names
+    centroids_df.set_index("Feature", inplace=True)
+
+    # Use pandas to print the DataFrame
+    print(centroids_df)
 
 if __name__ == "__main__":
     """
@@ -159,7 +167,7 @@ if __name__ == "__main__":
     to find 3 clusters and summarizes their characteristics.
     """
     data = data_loader.get_data("..\data\en.openfoodfacts.org.products.csv", 100)
-
+    #Should drop columns that are not meaningful
     numeric_data = select_numeric_columns(data)
 
     imputed_data = impute_missing_values(numeric_data)
