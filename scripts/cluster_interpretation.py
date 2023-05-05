@@ -158,6 +158,42 @@ def display_centroids(centroids_df):
     # Use pandas to print the DataFrame
     print(centroids_df)
 
+def top_features_per_cluster(centroids, feature_names, n_features=5):
+    """
+    Given the centroids of clusters and feature names, this function prints and returns the top n_features
+    per cluster, sorted by the weights of features in the centroids.
+
+    :param centroids: numpy array or list of lists, where each list represents the centroid of a cluster
+                      with the weights of the features
+    :param feature_names: list of strings, containing the names of the features corresponding to the weights
+                          in the centroids
+    :param n_features: int, optional (default=5), the number of top features to return for each cluster
+
+    :return: dict, where keys are cluster indices and values are lists of tuples containing the top n_features
+             and their corresponding weights
+    """
+
+    # Initialize an empty dictionary to store the top features for each cluster
+    top_features = {}
+
+    # Iterate through centroids
+    for i, centroid in enumerate(centroids):
+        # Find the indices of the top n_features in the centroid
+        top_n = sorted(range(len(centroid)), key=lambda k: centroid[k], reverse=True)[:n_features]
+
+        # Store the top features and their corresponding weights for the current cluster
+        top_features[i] = [(feature_names[f], centroid[f]) for f in top_n]
+
+    # Print the top features for each cluster
+    for cluster, features in top_features.items():
+        print(f"Cluster {cluster}:")
+        for feature, value in features:
+            print(f"  {feature}: {value}")
+
+    # Return the top features per cluster
+    return top_features
+
+
 if __name__ == "__main__":
     """
     This script loads the dataset, preprocesses it by selecting numeric columns,
@@ -186,3 +222,5 @@ if __name__ == "__main__":
 
     # Call the generate_wordclouds function
     generate_wordclouds(cluster_labels, imputed_data, item_names)
+
+    #top_features_per_cluster(centroids, data.columns, 5)
